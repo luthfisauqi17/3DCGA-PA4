@@ -296,7 +296,8 @@
             this.debugTextBox.Location = new System.Drawing.Point(15, 472);
             this.debugTextBox.Multiline = true;
             this.debugTextBox.Name = "debugTextBox";
-            this.debugTextBox.Size = new System.Drawing.Size(797, 230);
+            this.debugTextBox.ReadOnly = true;
+            this.debugTextBox.Size = new System.Drawing.Size(797, 437);
             this.debugTextBox.TabIndex = 18;
             // 
             // windowVminTextBox
@@ -338,7 +339,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(850, 721);
+            this.ClientSize = new System.Drawing.Size(850, 921);
             this.Controls.Add(this.defaultSettingsBtn);
             this.Controls.Add(this.label10);
             this.Controls.Add(this.windowVmaxTextBox);

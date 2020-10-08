@@ -1,4 +1,5 @@
 ﻿using System;
+using System.CodeDom.Compiler;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -27,25 +28,16 @@ namespace _3DCGA_PA4
         //Global variables
         Bitmap bmp;
         Graphics g;
-
         TPoint[] V = new TPoint[10];
         TPoint[] VW = new TPoint[10];
         TPoint[] VV = new TPoint[10];
         TPoint[] VS = new TPoint[10];
-
         TLine[] E = new TLine[15];
-
         double[,] Wt = new double[4, 4];
         double[,] Vt = new double[4, 4];
         double[,] St = new double[4, 4];
-
-        TPoint VRP, VPN, VUP, COP = new TPoint();
-
-        double windowUmin, windowVmin, windowUmax, windowVmax;
-
-        double FP,BP;
-
-        TPoint N, u, v;
+        TPoint VRP, VPN, VUP, COP, N, upUnit, upVec, v, u = new TPoint();
+        double windowUmin, windowVmin, windowUmax, windowVmax, FP, BP;
 
         
         //Functions
@@ -169,6 +161,57 @@ namespace _3DCGA_PA4
             setPoint(ref VPN, Convert.ToDouble(VPNxTextBox.Text), Convert.ToDouble(VPNyTextBox.Text), Convert.ToDouble(VPNzTextBox.Text));
             setPoint(ref VUP, Convert.ToDouble(VUPxTextBox.Text), Convert.ToDouble(VUPyTextBox.Text), Convert.ToDouble(VUPzTextBox.Text));
             setPoint(ref COP, Convert.ToDouble(COPxTextBox.Text), Convert.ToDouble(COPyTextBox.Text), Convert.ToDouble(COPzTextBox.Text));
+            windowUmin = Convert.ToDouble(windowUminTextBox.Text);
+            windowVmin = Convert.ToDouble(windowVminTextBox.Text);
+            windowUmax = Convert.ToDouble(windowUmaxTextBox.Text);
+            windowVmax = Convert.ToDouble(windowVmaxTextBox.Text);
+            FP = Convert.ToDouble(FPTextBox.Text);
+            BP = Convert.ToDouble(BPTextBox.Text);
+
+            double temp;
+            TPoint tempPoint;
+
+            temp = Math.Sqrt(Math.Pow(VPN.x, 2) + Math.Pow(VPN.y, 2) + Math.Pow(VPN.z, 2));
+            setPoint(ref N, VPN.x / temp, VPN.y / temp, VPN.z / temp);
+
+            temp = Math.Sqrt(Math.Pow(VUP.x, 2) + Math.Pow(VUP.y, 2) + Math.Pow(VUP.z, 2));
+            setPoint(ref upUnit, VUP.x / temp, VUP.y / temp, VUP.z / temp);
+
+            tempPoint = new TPoint();
+            temp = upUnit.x * N.x + upUnit.y * N.y + upUnit.z * N.z;
+            tempPoint.x = temp * N.x;
+            tempPoint.y = temp * N.y;
+            tempPoint.z = temp * N.z;
+            setPoint(ref upVec, upUnit.x - tempPoint.x, upUnit.y - tempPoint.y, upUnit.y - tempPoint.y);
+
+            temp = Math.Sqrt(Math.Pow(upVec.x, 2) + Math.Pow(upVec.y, 2) + Math.Pow(upVec.z, 2));
+            setPoint(ref v, upVec.x / temp, upVec.y / temp, upVec.z / temp);
+
+            tempPoint.x = (v.y * N.z) - (N.y * v.z);
+            tempPoint.y = (v.z * N.x) - (N.z * v.x);
+            tempPoint.z = (v.x * N.y) - (N.x * v.y);
+            setPoint(ref u, tempPoint.x, tempPoint.y, tempPoint.z);
+
+            debugTextBox.Text = "";
+            debugTextBox.AppendText("Viewing parameters:" + Environment.NewLine);
+            debugTextBox.AppendText("VRP = (" + VRP.x.ToString() + ", " + VRP.y.ToString() + ", " + VRP.z.ToString() + ")" + Environment.NewLine);
+            debugTextBox.AppendText("VPN = (" + VPN.x.ToString() + "   " + VPN.y.ToString() + "   " + VPN.z.ToString() + ")ᵀ" + Environment.NewLine);
+            debugTextBox.AppendText("VUP = (" + VUP.x.ToString() + "   " + VUP.y.ToString() + "   " + VUP.z.ToString() + ")ᵀ" + Environment.NewLine);
+            debugTextBox.AppendText("COP = (" + COP.x.ToString() + ", " + COP.y.ToString() + ", " + COP.z.ToString() + ")" + Environment.NewLine);
+            debugTextBox.AppendText("Window = (" + windowUmin.ToString() + ", " + windowVmin.ToString() + ", " + windowUmax.ToString() + ", " + windowVmax.ToString() + ")" + Environment.NewLine);
+            debugTextBox.AppendText("Projection type = Parallel" + Environment.NewLine);
+            debugTextBox.AppendText("Front plane = " + FP.ToString() + Environment.NewLine);
+            debugTextBox.AppendText("Back plane = " + BP.ToString() + Environment.NewLine);
+
+            debugTextBox.AppendText(Environment.NewLine);
+
+            debugTextBox.AppendText("N = (" + N.x.ToString() + "   " + N.y.ToString() + "   " + N.z.ToString() + ")ᵀ" + Environment.NewLine);
+            debugTextBox.AppendText("upUnit = (" + upUnit.x.ToString() + "   " + upUnit.y.ToString() + "   " + upUnit.z.ToString() + ")ᵀ" + Environment.NewLine);
+            debugTextBox.AppendText("upVec = (" + upVec.x.ToString() + "   " + upVec.y.ToString() + "   " + upVec.z.ToString() + ")ᵀ" + Environment.NewLine);
+            debugTextBox.AppendText("v = (" + v.x.ToString() + "   " + v.y.ToString() + "   " + v.z.ToString() + ")ᵀ" + Environment.NewLine);
+            debugTextBox.AppendText("u = (" + u.x.ToString() + "   " + u.y.ToString() + "   " + u.z.ToString() + ")ᵀ" + Environment.NewLine);
+
+            debugTextBox.AppendText(Environment.NewLine);
 
             debugTextBox.AppendText("Points:" + Environment.NewLine);
             for (int i = 0; i < 10; i++)
