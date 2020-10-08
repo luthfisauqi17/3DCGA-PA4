@@ -27,6 +27,7 @@ namespace _3DCGA_PA4
         //Global variables
         Bitmap bmp;
         Graphics g;
+
         TPoint[] V = new TPoint[10];
         TPoint[] VW = new TPoint[10];
         TPoint[] VV = new TPoint[10];
@@ -38,7 +39,15 @@ namespace _3DCGA_PA4
         double[,] Vt = new double[4, 4];
         double[,] St = new double[4, 4];
 
+        TPoint VRP, VPN, VUP, COP = new TPoint();
 
+        double windowUmin, windowVmin, windowUmax, windowVmax;
+
+        double FP,BP;
+
+        TPoint N, u, v;
+
+        
         //Functions
         public void setPoint(ref TPoint V, double x, double y, double z)
         {
@@ -152,13 +161,49 @@ namespace _3DCGA_PA4
                 VV[i] = multiplyMatrix(VW[i], Vt);
                 VS[i] = multiplyMatrix(VV[i], St);
             }
+        }
 
-            for(int i=0; i<10; i++)
+        private void drawBtn_Click(object sender, EventArgs e)
+        {
+            setPoint(ref VRP, Convert.ToDouble(VRPxTextBox.Text), Convert.ToDouble(VRPyTextBox.Text), Convert.ToDouble(VRPzTextBox.Text));
+            setPoint(ref VPN, Convert.ToDouble(VPNxTextBox.Text), Convert.ToDouble(VPNyTextBox.Text), Convert.ToDouble(VPNzTextBox.Text));
+            setPoint(ref VUP, Convert.ToDouble(VUPxTextBox.Text), Convert.ToDouble(VUPyTextBox.Text), Convert.ToDouble(VUPzTextBox.Text));
+            setPoint(ref COP, Convert.ToDouble(COPxTextBox.Text), Convert.ToDouble(COPyTextBox.Text), Convert.ToDouble(COPzTextBox.Text));
+
+            debugTextBox.AppendText("Points:" + Environment.NewLine);
+            for (int i = 0; i < 10; i++)
             {
                 debugTextBox.AppendText(i + " => " + "(" + VS[i].x + ", " + VS[i].y + ", " + VS[i].z + ")" + Environment.NewLine);
             }
 
             draw();
+        }
+
+        private void defaultSettingsBtn_Click(object sender, EventArgs e)
+        {
+            VRPxTextBox.Text = "0";
+            VRPyTextBox.Text = "0";
+            VRPzTextBox.Text = "0";
+
+            VPNxTextBox.Text = "0";
+            VPNyTextBox.Text = "0";
+            VPNzTextBox.Text = "1";
+
+            VUPxTextBox.Text = "0";
+            VUPyTextBox.Text = "1";
+            VUPzTextBox.Text = "0";
+
+            COPxTextBox.Text = "0";
+            COPyTextBox.Text = "0";
+            COPzTextBox.Text = "4";
+
+            windowUminTextBox.Text = "-2";
+            windowVminTextBox.Text = "-2";
+            windowUmaxTextBox.Text = "2";
+            windowVmaxTextBox.Text = "2";
+
+            FPTextBox.Text = "2";
+            BPTextBox.Text = "-2";
         }
     }
 }
