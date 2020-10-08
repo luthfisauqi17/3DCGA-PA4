@@ -297,7 +297,7 @@
             this.debugTextBox.Multiline = true;
             this.debugTextBox.Name = "debugTextBox";
             this.debugTextBox.ReadOnly = true;
-            this.debugTextBox.Size = new System.Drawing.Size(797, 437);
+            this.debugTextBox.Size = new System.Drawing.Size(797, 444);
             this.debugTextBox.TabIndex = 18;
             // 
             // windowVminTextBox
@@ -339,7 +339,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(850, 921);
+            this.ClientSize = new System.Drawing.Size(830, 934);
             this.Controls.Add(this.defaultSettingsBtn);
             this.Controls.Add(this.label10);
             this.Controls.Add(this.windowVmaxTextBox);
@@ -374,7 +374,6 @@
             this.Controls.Add(this.pictureBox1);
             this.Name = "Form1";
             this.Text = "3DCGA-PA4";
-            this.Load += new System.EventHandler(this.Form1_Load);
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();

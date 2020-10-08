@@ -36,8 +36,15 @@ namespace _3DCGA_PA4
         double[,] Wt = new double[4, 4];
         double[,] Vt = new double[4, 4];
         double[,] St = new double[4, 4];
-        TPoint VRP, VPN, VUP, COP, N, upUnit, upVec, v, u = new TPoint();
-        double windowUmin, windowVmin, windowUmax, windowVmax, FP, BP;
+        TPoint VRP, VPN, VUP, COP, N, upUnit, upVec, v, u, DOP, CW = new TPoint();
+        double windowUmin, windowVmin, windowUmax, windowVmax, FP, BP, rx, ry, rz, shx, shy, dx, dy, dz, sx, sy, sz;
+        double[,] T1 = new double[4, 4];
+        double[,] T2 = new double[4, 4];
+        double[,] T3 = new double[4, 4];
+        double[,] T4 = new double[4, 4];
+        double[,] T5 = new double[4, 4];
+        double[,] Pr1 = new double[4, 4];
+        double[,] Pr2 = new double[4, 4];
 
         
         //Functions
@@ -74,6 +81,23 @@ namespace _3DCGA_PA4
             return temp;
         }
 
+        public double[,] matrixMultiplication(double[,] M1, double [,] M2)
+        {
+            double[,] temp = new double[4,4];
+            for(int i=0; i<4; i++)
+            {
+                for(int j=0; j<4; j++)
+                {
+                    temp[i, j] = 0;
+                    for(int k=0; k<4; k++)
+                    {
+                        temp[i, j] += M1[i, k] * M2[k, j];
+                    }
+                }
+            }
+            return temp;
+        }
+
         public void draw()
         {
             bmp = new Bitmap(pictureBox1.Width, pictureBox1.Height);
@@ -103,8 +127,92 @@ namespace _3DCGA_PA4
             InitializeComponent();
         }
 
-        private void Form1_Load(object sender, EventArgs e)
+        private void drawBtn_Click(object sender, EventArgs e)
         {
+            setPoint(ref VRP, Convert.ToDouble(VRPxTextBox.Text), Convert.ToDouble(VRPyTextBox.Text), Convert.ToDouble(VRPzTextBox.Text));
+            setPoint(ref VPN, Convert.ToDouble(VPNxTextBox.Text), Convert.ToDouble(VPNyTextBox.Text), Convert.ToDouble(VPNzTextBox.Text));
+            setPoint(ref VUP, Convert.ToDouble(VUPxTextBox.Text), Convert.ToDouble(VUPyTextBox.Text), Convert.ToDouble(VUPzTextBox.Text));
+            setPoint(ref COP, Convert.ToDouble(COPxTextBox.Text), Convert.ToDouble(COPyTextBox.Text), Convert.ToDouble(COPzTextBox.Text));
+            windowUmin = Convert.ToDouble(windowUminTextBox.Text);
+            windowVmin = Convert.ToDouble(windowVminTextBox.Text);
+            windowUmax = Convert.ToDouble(windowUmaxTextBox.Text);
+            windowVmax = Convert.ToDouble(windowVmaxTextBox.Text);
+            FP = Convert.ToDouble(FPTextBox.Text);
+            BP = Convert.ToDouble(BPTextBox.Text);
+
+            setPoint(ref CW, (windowUmax + windowUmin) / 2, (windowVmax + windowVmin) / 2, 0);
+            setPoint(ref DOP, (CW.x - COP.x), (CW.y - COP.y), (CW.z - COP.z));
+
+            rx = VRP.x;
+            ry = VRP.y;
+            rz = VRP.z;
+
+            shx = -DOP.x / DOP.z;
+            shy = -DOP.y / DOP.z;
+
+            dx = -CW.x;
+            dy = -CW.y;
+            dz = -FP;
+
+            sx = 2 / (windowUmax - windowUmin);
+            sy = 2 / (windowVmax - windowVmin);
+            sz = 1 / (FP - BP);
+
+            double temp;
+            TPoint tempPoint;
+
+            temp = Math.Sqrt(Math.Pow(VPN.x, 2) + Math.Pow(VPN.y, 2) + Math.Pow(VPN.z, 2));
+            setPoint(ref N, VPN.x / temp, VPN.y / temp, VPN.z / temp);
+
+            temp = Math.Sqrt(Math.Pow(VUP.x, 2) + Math.Pow(VUP.y, 2) + Math.Pow(VUP.z, 2));
+            setPoint(ref upUnit, VUP.x / temp, VUP.y / temp, VUP.z / temp);
+
+            tempPoint = new TPoint();
+            temp = upUnit.x * N.x + upUnit.y * N.y + upUnit.z * N.z;
+            tempPoint.x = temp * N.x;
+            tempPoint.y = temp * N.y;
+            tempPoint.z = temp * N.z;
+            setPoint(ref upVec, upUnit.x - tempPoint.x, upUnit.y - tempPoint.y, upUnit.y - tempPoint.y);
+
+            temp = Math.Sqrt(Math.Pow(upVec.x, 2) + Math.Pow(upVec.y, 2) + Math.Pow(upVec.z, 2));
+            setPoint(ref v, upVec.x / temp, upVec.y / temp, upVec.z / temp);
+
+            tempPoint.x = (v.y * N.z) - (N.y * v.z);
+            tempPoint.y = (v.z * N.x) - (N.z * v.x);
+            tempPoint.z = (v.x * N.y) - (N.x * v.y);
+            setPoint(ref u, tempPoint.x, tempPoint.y, tempPoint.z);
+
+            setRowMatrix(ref T1, 0, 1, 0, 0, 0);
+            setRowMatrix(ref T1, 1, 0, 1, 0, 0);
+            setRowMatrix(ref T1, 2, 0, 0, 1, 0);
+            setRowMatrix(ref T1, 3, -rx, -ry, -rz, 1);
+
+            setRowMatrix(ref T2, 0, u.x, v.x, N.x, 0);
+            setRowMatrix(ref T2, 1, u.y, v.y, N.y, 0);
+            setRowMatrix(ref T2, 2, u.z, v.z, N.z, 0);
+            setRowMatrix(ref T2, 3, 0, 0, 0, 1);
+
+            setRowMatrix(ref T3, 0, 1, 0, 0, 0);
+            setRowMatrix(ref T3, 1, 0, 1, 0, 0);
+            setRowMatrix(ref T3, 2, shx, shy, 1, 0);
+            setRowMatrix(ref T3, 3, 0, 0, 0, 1);
+
+            setRowMatrix(ref T4, 0, 1, 0, 0, 0);
+            setRowMatrix(ref T4, 1, 0, 1, 0, 0);
+            setRowMatrix(ref T4, 2, 0, 0, 1, 0);
+            setRowMatrix(ref T4, 3, dx, dy, dz, 1);
+
+            setRowMatrix(ref T5, 0, sx, 0, 0, 0);
+            setRowMatrix(ref T5, 1, 0, sy, 0, 0);
+            setRowMatrix(ref T5, 2, 0, 0, sz, 0);
+            setRowMatrix(ref T5, 3, 0, 0, 0, 1);
+
+            Pr1 = matrixMultiplication(T1, matrixMultiplication(T2, matrixMultiplication(T3, matrixMultiplication(T4, T5))));
+            setRowMatrix(ref Pr2, 0, 1, 0, 0, 0);
+            setRowMatrix(ref Pr2, 1, 0, 1, 0, 0);
+            setRowMatrix(ref Pr2, 2, 0, 0, 1, 0);
+            setRowMatrix(ref Pr2, 3, 0, 0, 0, 1);
+
             setPoint(ref V[0], -1, -1, 1);
             setPoint(ref V[1], 1, -1, 1);
             setPoint(ref V[2], 1, 0, 1);
@@ -137,10 +245,7 @@ namespace _3DCGA_PA4
             setRowMatrix(ref Wt, 2, 0, 0, 1, 0);
             setRowMatrix(ref Wt, 3, 0, 0, 0, 1);
 
-            setRowMatrix(ref Vt, 0, 1, 0, 0, 0);
-            setRowMatrix(ref Vt, 1, 0, 1, 0, 0);
-            setRowMatrix(ref Vt, 2, 0, 0, 0, 0);
-            setRowMatrix(ref Vt, 3, 0, 0, 0, 1);
+            Vt = matrixMultiplication(Pr1, Pr2);
 
             setRowMatrix(ref St, 0, 50, 0, 0, 0);
             setRowMatrix(ref St, 1, 0, -50, 0, 0);
@@ -153,44 +258,6 @@ namespace _3DCGA_PA4
                 VV[i] = multiplyMatrix(VW[i], Vt);
                 VS[i] = multiplyMatrix(VV[i], St);
             }
-        }
-
-        private void drawBtn_Click(object sender, EventArgs e)
-        {
-            setPoint(ref VRP, Convert.ToDouble(VRPxTextBox.Text), Convert.ToDouble(VRPyTextBox.Text), Convert.ToDouble(VRPzTextBox.Text));
-            setPoint(ref VPN, Convert.ToDouble(VPNxTextBox.Text), Convert.ToDouble(VPNyTextBox.Text), Convert.ToDouble(VPNzTextBox.Text));
-            setPoint(ref VUP, Convert.ToDouble(VUPxTextBox.Text), Convert.ToDouble(VUPyTextBox.Text), Convert.ToDouble(VUPzTextBox.Text));
-            setPoint(ref COP, Convert.ToDouble(COPxTextBox.Text), Convert.ToDouble(COPyTextBox.Text), Convert.ToDouble(COPzTextBox.Text));
-            windowUmin = Convert.ToDouble(windowUminTextBox.Text);
-            windowVmin = Convert.ToDouble(windowVminTextBox.Text);
-            windowUmax = Convert.ToDouble(windowUmaxTextBox.Text);
-            windowVmax = Convert.ToDouble(windowVmaxTextBox.Text);
-            FP = Convert.ToDouble(FPTextBox.Text);
-            BP = Convert.ToDouble(BPTextBox.Text);
-
-            double temp;
-            TPoint tempPoint;
-
-            temp = Math.Sqrt(Math.Pow(VPN.x, 2) + Math.Pow(VPN.y, 2) + Math.Pow(VPN.z, 2));
-            setPoint(ref N, VPN.x / temp, VPN.y / temp, VPN.z / temp);
-
-            temp = Math.Sqrt(Math.Pow(VUP.x, 2) + Math.Pow(VUP.y, 2) + Math.Pow(VUP.z, 2));
-            setPoint(ref upUnit, VUP.x / temp, VUP.y / temp, VUP.z / temp);
-
-            tempPoint = new TPoint();
-            temp = upUnit.x * N.x + upUnit.y * N.y + upUnit.z * N.z;
-            tempPoint.x = temp * N.x;
-            tempPoint.y = temp * N.y;
-            tempPoint.z = temp * N.z;
-            setPoint(ref upVec, upUnit.x - tempPoint.x, upUnit.y - tempPoint.y, upUnit.y - tempPoint.y);
-
-            temp = Math.Sqrt(Math.Pow(upVec.x, 2) + Math.Pow(upVec.y, 2) + Math.Pow(upVec.z, 2));
-            setPoint(ref v, upVec.x / temp, upVec.y / temp, upVec.z / temp);
-
-            tempPoint.x = (v.y * N.z) - (N.y * v.z);
-            tempPoint.y = (v.z * N.x) - (N.z * v.x);
-            tempPoint.z = (v.x * N.y) - (N.x * v.y);
-            setPoint(ref u, tempPoint.x, tempPoint.y, tempPoint.z);
 
             debugTextBox.Text = "";
             debugTextBox.AppendText("Viewing parameters:" + Environment.NewLine);
@@ -218,6 +285,16 @@ namespace _3DCGA_PA4
             {
                 debugTextBox.AppendText(i + " => " + "(" + VS[i].x + ", " + VS[i].y + ", " + VS[i].z + ")" + Environment.NewLine);
             }
+
+            //debugTextBox.AppendText(Environment.NewLine);
+            //for(int i=0; i<4; i++)
+            //{
+            //    for(int j=0; j<4; j++)
+            //    {
+            //        debugTextBox.AppendText(Vt[i, j].ToString() + "   ");
+            //    }
+            //    debugTextBox.AppendText(Environment.NewLine);
+            //}
 
             draw();
         }
