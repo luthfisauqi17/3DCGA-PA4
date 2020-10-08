@@ -155,7 +155,7 @@
             this.button1.Name = "button1";
             this.button1.Size = new System.Drawing.Size(116, 49);
             this.button1.TabIndex = 17;
-            this.button1.Text = "Update";
+            this.button1.Text = "Draw";
             this.button1.UseVisualStyleBackColor = true;
             // 
             // VRPxTextBox
