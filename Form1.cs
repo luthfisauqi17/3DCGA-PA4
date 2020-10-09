@@ -13,7 +13,7 @@ namespace _3DCGA_PA4
 {
     public partial class Form1 : Form
     {
-        //Define struct
+        #region Structs
         public struct TPoint
         {
             public double x, y, z, w;
@@ -23,9 +23,9 @@ namespace _3DCGA_PA4
         {
             public int p1, p2;
         }
+        #endregion
 
-
-        //Global variables
+        #region Global variables
         Bitmap bmp;
         Graphics g;
         TPoint[] V = new TPoint[10];
@@ -45,14 +45,9 @@ namespace _3DCGA_PA4
         double[,] T5 = new double[4, 4];
         double[,] Pr1 = new double[4, 4];
         double[,] Pr2 = new double[4, 4];
+        #endregion
 
-        TPoint[] test1 = new TPoint[10];
-        TPoint[] test2 = new TPoint[10];
-        TPoint[] test3 = new TPoint[10];
-        TPoint[] test4 = new TPoint[10];
-        TPoint[] test5 = new TPoint[10];
-
-        //Functions
+        #region Functions
         public void setPoint(ref TPoint V, double x, double y, double z)
         {
             V.x = x;
@@ -126,7 +121,9 @@ namespace _3DCGA_PA4
 
             pictureBox1.Image = bmp;
         }
+        #endregion
 
+        #region Main code
         public Form1()
         {
             InitializeComponent();
@@ -134,6 +131,7 @@ namespace _3DCGA_PA4
 
         private void drawBtn_Click(object sender, EventArgs e)
         {
+            // Assigning variables value from the textboxes
             setPoint(ref VRP, Convert.ToDouble(VRPxTextBox.Text), Convert.ToDouble(VRPyTextBox.Text), Convert.ToDouble(VRPzTextBox.Text));
             setPoint(ref VPN, Convert.ToDouble(VPNxTextBox.Text), Convert.ToDouble(VPNyTextBox.Text), Convert.ToDouble(VPNzTextBox.Text));
             setPoint(ref VUP, Convert.ToDouble(VUPxTextBox.Text), Convert.ToDouble(VUPyTextBox.Text), Convert.ToDouble(VUPzTextBox.Text));
@@ -145,87 +143,92 @@ namespace _3DCGA_PA4
             FP = Convert.ToDouble(FPTextBox.Text);
             BP = Convert.ToDouble(BPTextBox.Text);
 
+            // Creating temporary variables
             double temp;
             TPoint tempPoint = new TPoint(); ;
 
+            // Calculating N unit vector
             temp = Math.Sqrt(Math.Pow(VPN.x, 2) + Math.Pow(VPN.y, 2) + Math.Pow(VPN.z, 2));
             setPoint(ref N, VPN.x / temp, VPN.y / temp, VPN.z / temp);
-
+            
+            // Calculating up unit vector
             temp = Math.Sqrt(Math.Pow(VUP.x, 2) + Math.Pow(VUP.y, 2) + Math.Pow(VUP.z, 2));
             setPoint(ref upUnit, VUP.x / temp, VUP.y / temp, VUP.z / temp);
 
+            // Calculating up vector
             temp = upUnit.x * N.x + upUnit.y * N.y + upUnit.z * N.z;
             tempPoint.x = temp * N.x;
             tempPoint.y = temp * N.y;
             tempPoint.z = temp * N.z;
             setPoint(ref upVec, upUnit.x - tempPoint.x, upUnit.y - tempPoint.y, upUnit.z - tempPoint.z);
 
+            // Calculating v unit vector
             temp = Math.Sqrt(Math.Pow(upVec.x, 2) + Math.Pow(upVec.y, 2) + Math.Pow(upVec.z, 2));
             setPoint(ref v, upVec.x / temp, upVec.y / temp, upVec.z / temp);
 
+            // Calculating u unit vector
             tempPoint.x = (v.y * N.z) - (N.y * v.z);
             tempPoint.y = (v.z * N.x) - (N.z * v.x);
             tempPoint.z = (v.x * N.y) - (N.x * v.y);
             setPoint(ref u, tempPoint.x, tempPoint.y, tempPoint.z);
 
+            // Calculating CW (Center of Window)
             setPoint(ref CW, (windowUmax + windowUmin) / 2, (windowVmax + windowVmin) / 2, 0);
+
+            // Calculating DOP (Direction of projection)
             setPoint(ref DOP, (CW.x - COP.x), (CW.y - COP.y), (CW.z - COP.z));
 
+            // Creating transformation matrix 1, Translate VRP to the origin (0, 0, 0)WCS
             rx = VRP.x;
             ry = VRP.y;
             rz = VRP.z;
-
-            shx = -DOP.x / DOP.z;
-            shy = -DOP.y / DOP.z;
-
-            dx = -CW.x;
-            dy = -CW.y;
-            dz = -FP;
-
-            sx = 2 / (windowUmax - windowUmin);
-            sy = 2 / (windowVmax - windowVmin);
-            sz = 1 / (FP - BP);
-
             setRowMatrix(ref T1, 0, 1, 0, 0, 0);
             setRowMatrix(ref T1, 1, 0, 1, 0, 0);
             setRowMatrix(ref T1, 2, 0, 0, 1, 0);
             setRowMatrix(ref T1, 3, -rx, -ry, -rz, 1);
 
+            // Creating transformation matrix 2, rotate VCS such that u, v, N aligned with x, y, z axes
             setRowMatrix(ref T2, 0, u.x, v.x, N.x, 0);
             setRowMatrix(ref T2, 1, u.y, v.y, N.y, 0);
             setRowMatrix(ref T2, 2, u.z, v.z, N.z, 0);
             setRowMatrix(ref T2, 3, 0, 0, 0, 1);
 
+            // Creating transformation matrix 3, shear such that the DOP become parallel to z-axis
+            shx = -DOP.x / DOP.z;
+            shy = -DOP.y / DOP.z;
             setRowMatrix(ref T3, 0, 1, 0, 0, 0);
             setRowMatrix(ref T3, 1, 0, 1, 0, 0);
             setRowMatrix(ref T3, 2, shx, shy, 1, 0);
             setRowMatrix(ref T3, 3, 0, 0, 0, 1);
 
+            // Creating transformation matrix 4, Translate the FP to the origin
+            dx = -CW.x;
+            dy = -CW.y;
+            dz = -FP;
             setRowMatrix(ref T4, 0, 1, 0, 0, 0);
             setRowMatrix(ref T4, 1, 0, 1, 0, 0);
             setRowMatrix(ref T4, 2, 0, 0, 1, 0);
             setRowMatrix(ref T4, 3, dx, dy, dz, 1);
 
+            // Creating transformation matrix 5, scale so that BP will become -1, and window become -1, -1, 1, 1
+            sx = 2 / (windowUmax - windowUmin);
+            sy = 2 / (windowVmax - windowVmin);
+            sz = 1 / (FP - BP);
             setRowMatrix(ref T5, 0, sx, 0, 0, 0);
             setRowMatrix(ref T5, 1, 0, sy, 0, 0);
             setRowMatrix(ref T5, 2, 0, 0, sz, 0);
             setRowMatrix(ref T5, 3, 0, 0, 0, 1);
 
-            for (int i = 0; i < 10; i++)
-            {
-                test1[i] = multiplyMatrix(V[i], T1);
-                test2[i] = multiplyMatrix(test1[i], T2);
-                test3[i] = multiplyMatrix(test2[i], T3);
-                test4[i] = multiplyMatrix(test3[i], T4);
-                test5[i] = multiplyMatrix(test4[i], T5);
-            }
-
+            // Creating Pr1 matrix which is the result of all transformation matrix multiplication
             Pr1 = matrixMultiplication(matrixMultiplication(matrixMultiplication(matrixMultiplication(T1, T2), T3), T4), T5);
+
+            // Creating Pr2 which is matrix for view projection
             setRowMatrix(ref Pr2, 0, 1, 0, 0, 0);
             setRowMatrix(ref Pr2, 1, 0, 1, 0, 0);
-            setRowMatrix(ref Pr2, 2, 0, 0, 1, 0);
+            setRowMatrix(ref Pr2, 2, 0, 0, 0, 0);
             setRowMatrix(ref Pr2, 3, 0, 0, 0, 1);
 
+            // Assigning all vertices
             setPoint(ref V[0], -1, -1, 1);
             setPoint(ref V[1], 1, -1, 1);
             setPoint(ref V[2], 1, 0, 1);
@@ -237,15 +240,7 @@ namespace _3DCGA_PA4
             setPoint(ref V[8], 0, 1, -1);
             setPoint(ref V[9], -1, 0, -1);
 
-            for (int i = 0; i < 10; i++)
-            {
-                test1[i] = multiplyMatrix(V[i], T1);
-                test2[i] = multiplyMatrix(test1[i], T2);
-                test3[i] = multiplyMatrix(test2[i], T3);
-                test4[i] = multiplyMatrix(test3[i], T4);
-                test5[i] = multiplyMatrix(test4[i], T5);
-            }
-
+            // Assigning all edges
             setLine(ref E[0], 0, 1);
             setLine(ref E[1], 1, 2);
             setLine(ref E[2], 2, 3);
@@ -262,44 +257,54 @@ namespace _3DCGA_PA4
             setLine(ref E[13], 3, 8);
             setLine(ref E[14], 4, 9);
 
+            // Creating World transformation matrix
             setRowMatrix(ref Wt, 0, 1, 0, 0, 0);
             setRowMatrix(ref Wt, 1, 0, 1, 0, 0);
             setRowMatrix(ref Wt, 2, 0, 0, 1, 0);
             setRowMatrix(ref Wt, 3, 0, 0, 0, 1);
 
+            // Creating view transformation matrix
             Vt = matrixMultiplication(Pr1, Pr2);
 
+            // Creating screen transformation matrix
             setRowMatrix(ref St, 0, 50, 0, 0, 0);
             setRowMatrix(ref St, 1, 0, -50, 0, 0);
             setRowMatrix(ref St, 2, 0, 0, 0, 0);
             setRowMatrix(ref St, 3, 200, 200, 0, 1);
 
+            // Multiply all point with Wt, Vt, and St
             for (int i = 0; i < 10; i++)
             {
                 VW[i] = multiplyMatrix(V[i], Wt);
                 VV[i] = multiplyMatrix(VW[i], Vt);
                 VS[i] = multiplyMatrix(VV[i], St);
             }
-
+            
+            // Debug
             debugTextBox.Text = "";
             debugTextBox.AppendText("Viewing parameters:" + Environment.NewLine);
-            debugTextBox.AppendText("VRP = (" + VRP.x.ToString() + ", " + VRP.y.ToString() + ", " + VRP.z.ToString() + ")" + Environment.NewLine);
-            debugTextBox.AppendText("VPN = (" + VPN.x.ToString() + "   " + VPN.y.ToString() + "   " + VPN.z.ToString() + ")ᵀ" + Environment.NewLine);
-            debugTextBox.AppendText("VUP = (" + VUP.x.ToString() + "   " + VUP.y.ToString() + "   " + VUP.z.ToString() + ")ᵀ" + Environment.NewLine);
-            debugTextBox.AppendText("COP = (" + COP.x.ToString() + ", " + COP.y.ToString() + ", " + COP.z.ToString() + ")" + Environment.NewLine);
-            debugTextBox.AppendText("Window = (" + windowUmin.ToString() + ", " + windowVmin.ToString() + ", " + windowUmax.ToString() + ", " + windowVmax.ToString() + ")" + Environment.NewLine);
-            debugTextBox.AppendText("Projection type = Parallel" + Environment.NewLine);
-            debugTextBox.AppendText("Front plane = " + FP.ToString() + Environment.NewLine);
-            debugTextBox.AppendText("Back plane = " + BP.ToString() + Environment.NewLine);
-
+            debugTextBox.AppendText("1. VRP = (" + VRP.x.ToString() + ", " + VRP.y.ToString() + ", " + VRP.z.ToString() + ")" + Environment.NewLine);
+            debugTextBox.AppendText("2. VPN = (" + VPN.x.ToString() + "   " + VPN.y.ToString() + "   " + VPN.z.ToString() + ")ᵀ" + Environment.NewLine);
+            debugTextBox.AppendText("3. VUP = (" + VUP.x.ToString() + "   " + VUP.y.ToString() + "   " + VUP.z.ToString() + ")ᵀ" + Environment.NewLine);
+            debugTextBox.AppendText("4. COP = (" + COP.x.ToString() + ", " + COP.y.ToString() + ", " + COP.z.ToString() + ")" + Environment.NewLine);
+            debugTextBox.AppendText("5. Window = (" + windowUmin.ToString() + ", " + windowVmin.ToString() + ", " + windowUmax.ToString() + ", " + windowVmax.ToString() + ")" + Environment.NewLine);
+            debugTextBox.AppendText("6. Projection type = Parallel" + Environment.NewLine);
+            debugTextBox.AppendText("7. Front plane = " + FP.ToString() + ", " + "Back plane = " + BP.ToString() + Environment.NewLine);
             debugTextBox.AppendText(Environment.NewLine);
 
-            debugTextBox.AppendText("N = (" + N.x.ToString() + "   " + N.y.ToString() + "   " + N.z.ToString() + ")ᵀ" + Environment.NewLine);
-            debugTextBox.AppendText("upUnit = (" + upUnit.x.ToString() + "   " + upUnit.y.ToString() + "   " + upUnit.z.ToString() + ")ᵀ" + Environment.NewLine);
-            debugTextBox.AppendText("upVec = (" + upVec.x.ToString() + "   " + upVec.y.ToString() + "   " + upVec.z.ToString() + ")ᵀ" + Environment.NewLine);
-            debugTextBox.AppendText("v = (" + v.x.ToString() + "   " + v.y.ToString() + "   " + v.z.ToString() + ")ᵀ" + Environment.NewLine);
-            debugTextBox.AppendText("u = (" + u.x.ToString() + "   " + u.y.ToString() + "   " + u.z.ToString() + ")ᵀ" + Environment.NewLine);
+            debugTextBox.AppendText("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+            debugTextBox.AppendText(Environment.NewLine);
+            debugTextBox.AppendText("Derived paremeters" + Environment.NewLine);
+            debugTextBox.AppendText("1. N = (" + N.x.ToString() + "   " + N.y.ToString() + "   " + N.z.ToString() + ")ᵀ" + Environment.NewLine);
+            debugTextBox.AppendText("2. upUnit = (" + upUnit.x.ToString() + "   " + upUnit.y.ToString() + "   " + upUnit.z.ToString() + ")ᵀ" + Environment.NewLine);
+            debugTextBox.AppendText("3. upVec = (" + upVec.x.ToString() + "   " + upVec.y.ToString() + "   " + upVec.z.ToString() + ")ᵀ" + Environment.NewLine);
+            debugTextBox.AppendText("4. v = (" + v.x.ToString() + "   " + v.y.ToString() + "   " + v.z.ToString() + ")ᵀ" + Environment.NewLine);
+            debugTextBox.AppendText("5. u = (" + u.x.ToString() + "   " + u.y.ToString() + "   " + u.z.ToString() + ")ᵀ" + Environment.NewLine);
+            debugTextBox.AppendText("6. DOP = (" + DOP.x.ToString() + "   " + DOP.y.ToString() + "   " + DOP.z.ToString() + ")ᵀ" + Environment.NewLine);
+            debugTextBox.AppendText("7. CW = (" + CW.x.ToString() + ", " + CW.y.ToString() + ", " + CW.z.ToString() + ")" + Environment.NewLine);
+            debugTextBox.AppendText(Environment.NewLine);
 
+            debugTextBox.AppendText("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
             debugTextBox.AppendText(Environment.NewLine);
 
             debugTextBox.AppendText("Points:" + Environment.NewLine);
@@ -308,54 +313,7 @@ namespace _3DCGA_PA4
                 debugTextBox.AppendText(i + " => " + "(" + VV[i].x + ", " + VV[i].y + ", " + VV[i].z + ")" + Environment.NewLine);
             }
 
-
-
-            debugTextBox.AppendText(Environment.NewLine);
-            debugTextBox.AppendText("Test1:" + Environment.NewLine);
-            for (int i = 0; i < 10; i++)
-            {
-                debugTextBox.AppendText(i + " => " + "(" + test1[i].x + ", " + test1[i].y + ", " + test1[i].z + ")" + Environment.NewLine);
-            }
-
-            debugTextBox.AppendText(Environment.NewLine);
-            debugTextBox.AppendText("Test2:" + Environment.NewLine);
-            for (int i = 0; i < 10; i++)
-            {
-                debugTextBox.AppendText(i + " => " + "(" + test2[i].x + ", " + test2[i].y + ", " + test2[i].z + ")" + Environment.NewLine);
-            }
-
-            debugTextBox.AppendText(Environment.NewLine);
-            debugTextBox.AppendText("Test3:" + Environment.NewLine);
-            for (int i = 0; i < 10; i++)
-            {
-                debugTextBox.AppendText(i + " => " + "(" + test3[i].x + ", " + test3[i].y + ", " + test3[i].z + ")" + Environment.NewLine);
-            }
-
-            debugTextBox.AppendText(Environment.NewLine);
-            debugTextBox.AppendText("Test4:" + Environment.NewLine);
-            for (int i = 0; i < 10; i++)
-            {
-                debugTextBox.AppendText(i + " => " + "(" + test4[i].x + ", " + test4[i].y + ", " + test4[i].z + ")" + Environment.NewLine);
-            }
-            
-            debugTextBox.AppendText(Environment.NewLine);
-            debugTextBox.AppendText("Test5:" + Environment.NewLine);
-            for (int i = 0; i < 10; i++)
-            {
-                debugTextBox.AppendText(i + " => " + "(" + test5[i].x + ", " + test5[i].y + ", " + test5[i].z + ")" + Environment.NewLine);
-            }
-
-            //debugTextBox.AppendText(Environment.NewLine);
-            //for(int i=0; i<4; i++)
-            //{
-            //    for(int j=0; j<4; j++)
-            //    {
-            //        debugTextBox.AppendText(Vt[i, j].ToString() + "   ");
-            //    }
-            //    debugTextBox.AppendText(Environment.NewLine);
-            //}
-
-
+            // Draw object on the screen
             draw();
         }
 
@@ -385,5 +343,7 @@ namespace _3DCGA_PA4
             FPTextBox.Text = "2";
             BPTextBox.Text = "-2";
         }
+        #endregion
     }
+
 }
