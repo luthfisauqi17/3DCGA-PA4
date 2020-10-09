@@ -46,7 +46,12 @@ namespace _3DCGA_PA4
         double[,] Pr1 = new double[4, 4];
         double[,] Pr2 = new double[4, 4];
 
-        
+        TPoint[] test1 = new TPoint[10];
+        TPoint[] test2 = new TPoint[10];
+        TPoint[] test3 = new TPoint[10];
+        TPoint[] test4 = new TPoint[10];
+        TPoint[] test5 = new TPoint[10];
+
         //Functions
         public void setPoint(ref TPoint V, double x, double y, double z)
         {
@@ -140,6 +145,29 @@ namespace _3DCGA_PA4
             FP = Convert.ToDouble(FPTextBox.Text);
             BP = Convert.ToDouble(BPTextBox.Text);
 
+            double temp;
+            TPoint tempPoint = new TPoint(); ;
+
+            temp = Math.Sqrt(Math.Pow(VPN.x, 2) + Math.Pow(VPN.y, 2) + Math.Pow(VPN.z, 2));
+            setPoint(ref N, VPN.x / temp, VPN.y / temp, VPN.z / temp);
+
+            temp = Math.Sqrt(Math.Pow(VUP.x, 2) + Math.Pow(VUP.y, 2) + Math.Pow(VUP.z, 2));
+            setPoint(ref upUnit, VUP.x / temp, VUP.y / temp, VUP.z / temp);
+
+            temp = upUnit.x * N.x + upUnit.y * N.y + upUnit.z * N.z;
+            tempPoint.x = temp * N.x;
+            tempPoint.y = temp * N.y;
+            tempPoint.z = temp * N.z;
+            setPoint(ref upVec, upUnit.x - tempPoint.x, upUnit.y - tempPoint.y, upUnit.y - tempPoint.y);
+
+            temp = Math.Sqrt(Math.Pow(upVec.x, 2) + Math.Pow(upVec.y, 2) + Math.Pow(upVec.z, 2));
+            setPoint(ref v, upVec.x / temp, upVec.y / temp, upVec.z / temp);
+
+            tempPoint.x = (v.y * N.z) - (N.y * v.z);
+            tempPoint.y = (v.z * N.x) - (N.z * v.x);
+            tempPoint.z = (v.x * N.y) - (N.x * v.y);
+            setPoint(ref u, tempPoint.x, tempPoint.y, tempPoint.z);
+
             setPoint(ref CW, (windowUmax + windowUmin) / 2, (windowVmax + windowVmin) / 2, 0);
             setPoint(ref DOP, (CW.x - COP.x), (CW.y - COP.y), (CW.z - COP.z));
 
@@ -157,30 +185,6 @@ namespace _3DCGA_PA4
             sx = 2 / (windowUmax - windowUmin);
             sy = 2 / (windowVmax - windowVmin);
             sz = 1 / (FP - BP);
-
-            double temp;
-            TPoint tempPoint;
-
-            temp = Math.Sqrt(Math.Pow(VPN.x, 2) + Math.Pow(VPN.y, 2) + Math.Pow(VPN.z, 2));
-            setPoint(ref N, VPN.x / temp, VPN.y / temp, VPN.z / temp);
-
-            temp = Math.Sqrt(Math.Pow(VUP.x, 2) + Math.Pow(VUP.y, 2) + Math.Pow(VUP.z, 2));
-            setPoint(ref upUnit, VUP.x / temp, VUP.y / temp, VUP.z / temp);
-
-            tempPoint = new TPoint();
-            temp = upUnit.x * N.x + upUnit.y * N.y + upUnit.z * N.z;
-            tempPoint.x = temp * N.x;
-            tempPoint.y = temp * N.y;
-            tempPoint.z = temp * N.z;
-            setPoint(ref upVec, upUnit.x - tempPoint.x, upUnit.y - tempPoint.y, upUnit.y - tempPoint.y);
-
-            temp = Math.Sqrt(Math.Pow(upVec.x, 2) + Math.Pow(upVec.y, 2) + Math.Pow(upVec.z, 2));
-            setPoint(ref v, upVec.x / temp, upVec.y / temp, upVec.z / temp);
-
-            tempPoint.x = (v.y * N.z) - (N.y * v.z);
-            tempPoint.y = (v.z * N.x) - (N.z * v.x);
-            tempPoint.z = (v.x * N.y) - (N.x * v.y);
-            setPoint(ref u, tempPoint.x, tempPoint.y, tempPoint.z);
 
             setRowMatrix(ref T1, 0, 1, 0, 0, 0);
             setRowMatrix(ref T1, 1, 0, 1, 0, 0);
@@ -207,7 +211,16 @@ namespace _3DCGA_PA4
             setRowMatrix(ref T5, 2, 0, 0, sz, 0);
             setRowMatrix(ref T5, 3, 0, 0, 0, 1);
 
-            Pr1 = matrixMultiplication(T1, matrixMultiplication(T2, matrixMultiplication(T3, matrixMultiplication(T4, T5))));
+            for (int i = 0; i < 10; i++)
+            {
+                test1[i] = multiplyMatrix(V[i], T1);
+                test2[i] = multiplyMatrix(test1[i], T2);
+                test3[i] = multiplyMatrix(test2[i], T3);
+                test4[i] = multiplyMatrix(test3[i], T4);
+                test5[i] = multiplyMatrix(test4[i], T5);
+            }
+
+            Pr1 = matrixMultiplication(matrixMultiplication(matrixMultiplication(matrixMultiplication(T1, T2), T3), T4), T5);
             setRowMatrix(ref Pr2, 0, 1, 0, 0, 0);
             setRowMatrix(ref Pr2, 1, 0, 1, 0, 0);
             setRowMatrix(ref Pr2, 2, 0, 0, 1, 0);
@@ -223,6 +236,15 @@ namespace _3DCGA_PA4
             setPoint(ref V[7], 1, 0, -1);
             setPoint(ref V[8], 0, 1, -1);
             setPoint(ref V[9], -1, 0, -1);
+
+            for (int i = 0; i < 10; i++)
+            {
+                test1[i] = multiplyMatrix(V[i], T1);
+                test2[i] = multiplyMatrix(test1[i], T2);
+                test3[i] = multiplyMatrix(test2[i], T3);
+                test4[i] = multiplyMatrix(test3[i], T4);
+                test5[i] = multiplyMatrix(test4[i], T5);
+            }
 
             setLine(ref E[0], 0, 1);
             setLine(ref E[1], 1, 2);
@@ -280,10 +302,47 @@ namespace _3DCGA_PA4
 
             debugTextBox.AppendText(Environment.NewLine);
 
-            debugTextBox.AppendText("Points:" + Environment.NewLine);
+            //debugTextBox.AppendText("Points:" + Environment.NewLine);
+            //for (int i = 0; i < 10; i++)
+            //{
+            //    debugTextBox.AppendText(i + " => " + "(" + VS[i].x + ", " + VS[i].y + ", " + VS[i].z + ")" + Environment.NewLine);
+            //}
+
+
+
+            debugTextBox.AppendText(Environment.NewLine);
+            debugTextBox.AppendText("Test1:" + Environment.NewLine);
             for (int i = 0; i < 10; i++)
             {
-                debugTextBox.AppendText(i + " => " + "(" + VS[i].x + ", " + VS[i].y + ", " + VS[i].z + ")" + Environment.NewLine);
+                debugTextBox.AppendText(i + " => " + "(" + test1[i].x + ", " + test1[i].y + ", " + test1[i].z + ")" + Environment.NewLine);
+            }
+
+            debugTextBox.AppendText(Environment.NewLine);
+            debugTextBox.AppendText("Test2:" + Environment.NewLine);
+            for (int i = 0; i < 10; i++)
+            {
+                debugTextBox.AppendText(i + " => " + "(" + test2[i].x + ", " + test2[i].y + ", " + test2[i].z + ")" + Environment.NewLine);
+            }
+
+            debugTextBox.AppendText(Environment.NewLine);
+            debugTextBox.AppendText("Test3:" + Environment.NewLine);
+            for (int i = 0; i < 10; i++)
+            {
+                debugTextBox.AppendText(i + " => " + "(" + test3[i].x + ", " + test3[i].y + ", " + test3[i].z + ")" + Environment.NewLine);
+            }
+
+            debugTextBox.AppendText(Environment.NewLine);
+            debugTextBox.AppendText("Test4:" + Environment.NewLine);
+            for (int i = 0; i < 10; i++)
+            {
+                debugTextBox.AppendText(i + " => " + "(" + test4[i].x + ", " + test4[i].y + ", " + test4[i].z + ")" + Environment.NewLine);
+            }
+            
+            debugTextBox.AppendText(Environment.NewLine);
+            debugTextBox.AppendText("Test5:" + Environment.NewLine);
+            for (int i = 0; i < 10; i++)
+            {
+                debugTextBox.AppendText(i + " => " + "(" + test5[i].x + ", " + test5[i].y + ", " + test5[i].z + ")" + Environment.NewLine);
             }
 
             //debugTextBox.AppendText(Environment.NewLine);
@@ -295,6 +354,7 @@ namespace _3DCGA_PA4
             //    }
             //    debugTextBox.AppendText(Environment.NewLine);
             //}
+
 
             draw();
         }
