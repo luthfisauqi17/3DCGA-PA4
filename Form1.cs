@@ -158,7 +158,7 @@ namespace _3DCGA_PA4
             tempPoint.x = temp * N.x;
             tempPoint.y = temp * N.y;
             tempPoint.z = temp * N.z;
-            setPoint(ref upVec, upUnit.x - tempPoint.x, upUnit.y - tempPoint.y, upUnit.y - tempPoint.y);
+            setPoint(ref upVec, upUnit.x - tempPoint.x, upUnit.y - tempPoint.y, upUnit.z - tempPoint.z);
 
             temp = Math.Sqrt(Math.Pow(upVec.x, 2) + Math.Pow(upVec.y, 2) + Math.Pow(upVec.z, 2));
             setPoint(ref v, upVec.x / temp, upVec.y / temp, upVec.z / temp);
@@ -302,11 +302,11 @@ namespace _3DCGA_PA4
 
             debugTextBox.AppendText(Environment.NewLine);
 
-            //debugTextBox.AppendText("Points:" + Environment.NewLine);
-            //for (int i = 0; i < 10; i++)
-            //{
-            //    debugTextBox.AppendText(i + " => " + "(" + VS[i].x + ", " + VS[i].y + ", " + VS[i].z + ")" + Environment.NewLine);
-            //}
+            debugTextBox.AppendText("Points:" + Environment.NewLine);
+            for (int i = 0; i < 10; i++)
+            {
+                debugTextBox.AppendText(i + " => " + "(" + VV[i].x + ", " + VV[i].y + ", " + VV[i].z + ")" + Environment.NewLine);
+            }
 
 
 
