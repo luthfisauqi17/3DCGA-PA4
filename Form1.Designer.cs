@@ -60,13 +60,16 @@
             this.windowVmaxTextBox = new System.Windows.Forms.TextBox();
             this.label10 = new System.Windows.Forms.Label();
             this.defaultSettingsBtn = new System.Windows.Forms.Button();
+            this.loadObjectBtn = new System.Windows.Forms.Button();
+            this.saveLogBtn = new System.Windows.Forms.Button();
+            this.objectNameTextBox = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.SuspendLayout();
             // 
             // pictureBox1
             // 
             this.pictureBox1.BackColor = System.Drawing.Color.White;
-            this.pictureBox1.Location = new System.Drawing.Point(15, 12);
+            this.pictureBox1.Location = new System.Drawing.Point(15, 44);
             this.pictureBox1.Name = "pictureBox1";
             this.pictureBox1.Size = new System.Drawing.Size(400, 400);
             this.pictureBox1.TabIndex = 0;
@@ -155,7 +158,7 @@
             // 
             // drawBtn
             // 
-            this.drawBtn.Location = new System.Drawing.Point(487, 394);
+            this.drawBtn.Location = new System.Drawing.Point(498, 395);
             this.drawBtn.Name = "drawBtn";
             this.drawBtn.Size = new System.Drawing.Size(116, 49);
             this.drawBtn.TabIndex = 17;
@@ -298,7 +301,7 @@
             this.debugTextBox.Name = "debugTextBox";
             this.debugTextBox.ReadOnly = true;
             this.debugTextBox.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            this.debugTextBox.Size = new System.Drawing.Size(797, 347);
+            this.debugTextBox.Size = new System.Drawing.Size(797, 289);
             this.debugTextBox.TabIndex = 18;
             // 
             // windowVminTextBox
@@ -320,7 +323,7 @@
             // label10
             // 
             this.label10.AutoSize = true;
-            this.label10.Location = new System.Drawing.Point(12, 438);
+            this.label10.Location = new System.Drawing.Point(12, 452);
             this.label10.Name = "label10";
             this.label10.Size = new System.Drawing.Size(82, 17);
             this.label10.TabIndex = 21;
@@ -328,19 +331,51 @@
             // 
             // defaultSettingsBtn
             // 
-            this.defaultSettingsBtn.Location = new System.Drawing.Point(643, 394);
+            this.defaultSettingsBtn.Location = new System.Drawing.Point(650, 395);
             this.defaultSettingsBtn.Name = "defaultSettingsBtn";
             this.defaultSettingsBtn.Size = new System.Drawing.Size(116, 49);
             this.defaultSettingsBtn.TabIndex = 22;
-            this.defaultSettingsBtn.Text = "Default Settings";
+            this.defaultSettingsBtn.Text = "Default Parameters";
             this.defaultSettingsBtn.UseVisualStyleBackColor = true;
             this.defaultSettingsBtn.Click += new System.EventHandler(this.defaultSettingsBtn_Click);
+            // 
+            // loadObjectBtn
+            // 
+            this.loadObjectBtn.Location = new System.Drawing.Point(318, 9);
+            this.loadObjectBtn.Name = "loadObjectBtn";
+            this.loadObjectBtn.Size = new System.Drawing.Size(97, 29);
+            this.loadObjectBtn.TabIndex = 23;
+            this.loadObjectBtn.Text = "Load Object";
+            this.loadObjectBtn.UseVisualStyleBackColor = true;
+            this.loadObjectBtn.Click += new System.EventHandler(this.loadObjectBtn_Click);
+            // 
+            // saveLogBtn
+            // 
+            this.saveLogBtn.Location = new System.Drawing.Point(15, 767);
+            this.saveLogBtn.Name = "saveLogBtn";
+            this.saveLogBtn.Size = new System.Drawing.Size(79, 39);
+            this.saveLogBtn.TabIndex = 24;
+            this.saveLogBtn.Text = "Save Log";
+            this.saveLogBtn.UseVisualStyleBackColor = true;
+            this.saveLogBtn.Click += new System.EventHandler(this.saveLogBtn_Click);
+            // 
+            // objectNameTextBox
+            // 
+            this.objectNameTextBox.AutoSize = true;
+            this.objectNameTextBox.Location = new System.Drawing.Point(12, 15);
+            this.objectNameTextBox.Name = "objectNameTextBox";
+            this.objectNameTextBox.Size = new System.Drawing.Size(134, 17);
+            this.objectNameTextBox.TabIndex = 25;
+            this.objectNameTextBox.Text = "Object: (not loaded)";
             // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(830, 831);
+            this.ClientSize = new System.Drawing.Size(830, 810);
+            this.Controls.Add(this.objectNameTextBox);
+            this.Controls.Add(this.saveLogBtn);
+            this.Controls.Add(this.loadObjectBtn);
             this.Controls.Add(this.defaultSettingsBtn);
             this.Controls.Add(this.label10);
             this.Controls.Add(this.windowVmaxTextBox);
@@ -416,6 +451,9 @@
         private System.Windows.Forms.TextBox windowVmaxTextBox;
         private System.Windows.Forms.Label label10;
         private System.Windows.Forms.Button defaultSettingsBtn;
+        private System.Windows.Forms.Button loadObjectBtn;
+        private System.Windows.Forms.Button saveLogBtn;
+        private System.Windows.Forms.Label objectNameTextBox;
     }
 }
 
