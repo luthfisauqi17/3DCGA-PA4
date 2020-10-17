@@ -85,5 +85,14 @@
   <ItemGroup>
     <None Include="App.config" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="assets\icon\upload-icon.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="assets\icon\Actions-draw-brush-icon.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="assets\icon\application-default-icon.png" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
