@@ -8,3 +8,6 @@ C:\Users\Luthfi Syauqi\source\repos\3DCGA-PA4\obj\Debug\3DCGA-PA4.csproj.Generat
 C:\Users\Luthfi Syauqi\source\repos\3DCGA-PA4\obj\Debug\3DCGA-PA4.csproj.CoreCompileInputs.cache
 C:\Users\Luthfi Syauqi\source\repos\3DCGA-PA4\obj\Debug\3DCGA-PA4.exe
 C:\Users\Luthfi Syauqi\source\repos\3DCGA-PA4\obj\Debug\3DCGA-PA4.pdb
+C:\Local Disk D\File Kuliah\Semester 7\3D-CGA\3DCGA-PA1\3DCGA-PA4\bin\Debug\3DCGA-PA4.exe.config
+C:\Local Disk D\File Kuliah\Semester 7\3D-CGA\3DCGA-PA1\3DCGA-PA4\obj\Debug\3DCGA-PA4.exe
+C:\Local Disk D\File Kuliah\Semester 7\3D-CGA\3DCGA-PA1\3DCGA-PA4\obj\Debug\3DCGA-PA4.pdb
