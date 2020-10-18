@@ -1,14 +1,8 @@
 ﻿using System;
-using System.CodeDom.Compiler;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace _3DCGA_PA4
@@ -35,8 +29,8 @@ namespace _3DCGA_PA4
 
         TPoint[] V;
         TPoint[] VW;
-        TPoint[] VV;
-        TPoint[] VS;
+        TPoint[] VV = new TPoint[30];
+        TPoint[] VS = new TPoint[30];
         TLine[] E;
 
         double[,] Wt = new double[4, 4];
@@ -54,6 +48,14 @@ namespace _3DCGA_PA4
         double[,] T5 = new double[4, 4];
         double[,] Pr1 = new double[4, 4];
         double[,] Pr2 = new double[4, 4];
+
+        TPoint[] VPr1;
+        TLine[] newEintersect = new TLine[15];
+        TPoint[] newVintersect = new TPoint[30];
+
+        List<TPoint> newV = new List<TPoint>();
+        List<int> edgeTest = new List<int>();
+        List<int> rejected = new List<int>();
         #endregion
 
         #region Functions
@@ -90,21 +92,243 @@ namespace _3DCGA_PA4
             return temp;
         }
 
-        public double[,] matrixMultiplication(double[,] M1, double [,] M2)
+        public double[,] matrixMultiplication(double[,] M1, double[,] M2)
         {
-            double[,] temp = new double[4,4];
-            for(int i=0; i<4; i++)
+            double[,] temp = new double[4, 4];
+            for (int i = 0; i < 4; i++)
             {
-                for(int j=0; j<4; j++)
+                for (int j = 0; j < 4; j++)
                 {
                     temp[i, j] = 0;
-                    for(int k=0; k<4; k++)
+                    for (int k = 0; k < 4; k++)
                     {
                         temp[i, j] += M1[i, k] * M2[k, j];
                     }
                 }
             }
             return temp;
+        }
+
+        public void createNewVertex()
+        {
+            for (int i = 0; i < newVintersect.Length; i++)
+            {
+                setPoint(ref newVintersect[i], newV[i].x, newV[i].y, newV[i].z);
+            }
+        }
+
+        public void createNewEdge()
+        {
+            for (int i = 0; i < newEintersect.Length; i++)
+            {
+                setLine(ref newEintersect[i], i * 2, i * 2 + 1);
+            }
+        }
+
+        public int getAreaCode(TPoint P)
+        {
+            int n = 0;
+
+            if (P.z > FP) n += 32;
+            else if (P.z < BP) n += 16;
+
+            if (P.y > 1) n += 8;
+            else if (P.y < -1) n += 4;
+
+            if (P.x > 1) n += 2;
+            else if (P.x < -1) n += 1;
+
+            return n;
+        }
+
+        public void getAllIntersections()
+        {
+            for (int i = 0; i < ENum; i++)
+            {
+                TPoint p1 = VPr1[E[i].p1];
+                TPoint p2 = VPr1[E[i].p2];
+                int c1 = getAreaCode(p1);
+                int c2 = getAreaCode(p2);
+                if ((c1 | c2) == 0)
+                {
+                    newV.Add(p1);
+                    newV.Add(p2);
+                    edgeTest.Add(E[i].p1);
+                    edgeTest.Add(E[i].p2);
+                }
+                else if ((c1 & c2) == c1 && (c1 & c2) == c2)
+                {
+                    newV.Add(p1);
+                    newV.Add(p2);
+                    edgeTest.Add(E[i].p1);
+                    edgeTest.Add(E[i].p2);
+                }
+                else if ((c1 | c2) != 0)
+                {
+                    while ((c1 | c2) != 0)
+                    {
+                        double t, ppx, ppy, ppz;
+                        if ((c1 | c2) >= 32) // Intersect with front
+                        {
+                            if (c1 > c2)
+                            {
+                                ppz = 1;
+                                t = (ppz - p2.z) / (p1.z - p2.z);
+                                p1.y = p2.y + t * (p1.y - p2.y);
+                                p1.x = p2.x + t * (p1.x - p2.x);
+                                p1.z = 1;
+                            }
+                            else
+                            {
+                                ppz = 1;
+                                t = (ppz - p1.z) / (p2.z - p1.z);
+                                p2.y = p1.y + t * (p2.y - p1.y);
+                                p2.x = p1.x + t * (p2.x - p1.x);
+                                p2.z = 1;
+                            }
+                        }
+
+                        else if ((c1 | c2) >= 16 && (c1 | c2) < 32) // Intersect with behind
+                        {
+                            if (c1 > c2)
+                            {
+                                ppz = -1;
+                                t = (ppz - p2.z) / (p1.z - p2.z);
+                                p1.y = p2.y + t * (p1.y - p2.y);
+                                p1.x = p2.x + t * (p1.x - p2.x);
+                                p1.z = -1;
+                            }
+                            else
+                            {
+                                ppz = -1;
+                                t = (ppz - p1.z) / (p2.z - p1.z);
+                                p2.y = p1.y + t * (p2.y - p1.y);
+                                p2.x = p1.x + t * (p2.x - p1.x);
+                                p2.z = -1;
+                            }
+                        }
+
+                        else if ((c1 | c2) >= 8 && (c1 | c2) < 16) // Intersect with top
+                        {
+                            if (c1 > c2)
+                            {
+                                ppy = 1;
+                                t = (ppy - p2.y) / (p1.y - p2.y);
+                                p1.x = p2.x + t * (p1.x - p2.x);
+                                p1.z = p2.z + t * (p1.z - p2.z);
+                                p1.y = 1;
+                            }
+                            else
+                            {
+                                ppy = 1;
+                                t = (ppy - p1.y) / (p2.y - p1.y);
+                                p2.x = p1.x + t * (p2.x - p1.x);
+                                p2.z = p1.z + t * (p2.z - p1.z);
+                                p2.y = 1;
+                            }
+                        }
+
+                        else if ((c1 | c2) >= 4 && (c1 | c2) < 8) // Intersect with bottom
+                        {
+                            if (c1 > c2)
+                            {
+                                ppy = -1;
+                                t = (ppy - p2.y) / (p1.y - p2.y);
+                                p1.x = p2.x + t * (p1.x - p2.x);
+                                p1.z = p2.z + t * (p1.z - p2.z);
+                                p1.y = -1;
+                            }
+                            else
+                            {
+                                ppy = -1;
+                                t = (ppy - p1.y) / (p2.y - p1.y);
+                                p2.x = p1.x + t * (p2.x - p1.x);
+                                p2.z = p1.z + t * (p2.z - p1.z);
+                                p2.y = -1;
+                            }
+                        }
+
+                        else if ((c1 | c2) >= 2 && (c1 | c2) < 4) // Intersect with right
+                        {
+                            if (c1 > c2)
+                            {
+                                ppx = 1;
+                                t = (ppx - p2.x) / (p1.x - p2.x);
+                                p1.y = p2.y + t * (p1.y - p2.y);
+                                p1.z = p2.z + t * (p1.z - p2.z);
+                                p1.x = 1;
+                            }
+                            else
+                            {
+                                ppx = 1;
+                                t = (ppx - p1.x) / (p2.x - p1.x);
+                                p2.y = p1.y + t * (p2.y - p1.y);
+                                p2.z = p1.z + t * (p2.z - p1.z);
+                                p2.x = 1;
+                            }
+                        }
+
+                        else if ((c1 | c2) >= 1 && (c1 | c2) < 2) // Intersect with left
+                        {
+                            if (c1 > c2)
+                            {
+                                ppx = -1;
+                                t = (ppx - p2.x) / (p1.x - p2.x);
+                                p1.y = p2.y + t * (p1.y - p2.y);
+                                p1.z = p2.z + t * (p1.z - p2.z);
+                                p1.x = -1;
+                            }
+                            else
+                            {
+                                ppx = -1;
+                                t = (ppx - p1.x) / (p2.x - p1.x);
+                                p2.y = p1.y + t * (p2.y - p1.y);
+                                p2.z = p1.z + t * (p2.z - p1.z);
+                                p2.x = -1;
+                            }
+                        }
+                        c1 = getAreaCode(p1);
+                        c2 = getAreaCode(p2);
+                        if ((c1 | c2) == 0)
+                        {
+                            //debugTextBox.AppendText("Accepted");
+                            newV.Add(p1);
+                            newV.Add(p2);
+                            edgeTest.Add(E[i].p1);
+                            edgeTest.Add(E[i].p2);
+                            break;
+                        }
+                        else if ((c1 & c2) == c1 && (c1 & c2) == c2)
+                        {
+                            //debugTextBox.AppendText("Rejected");
+                            newV.Add(p1);
+                            newV.Add(p2);
+                            edgeTest.Add(E[i].p1);
+                            edgeTest.Add(E[i].p2);
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+
+        public void clipping()
+        {
+            for (int i = 0; i < newEintersect.Length; i++)
+            {
+                TPoint p1 = newVintersect[newEintersect[i].p1];
+                TPoint p2 = newVintersect[newEintersect[i].p2];
+                int c1 = getAreaCode(p1);
+                int c2 = getAreaCode(p2);
+                if ((c1 | c2) == 0)
+                {
+                    continue;
+                }
+                else if ((c1 & c2) == c1 && (c1 & c2) == c2)
+                {
+                    rejected.Add(i);
+                }
+            }
         }
 
         public void draw()
@@ -115,18 +339,37 @@ namespace _3DCGA_PA4
             Pen redPen = new Pen(Color.Red);
             Pen blackPen = new Pen(Color.Black);
             TPoint p1, p2;
-            for (int i = Front; i < ENum; i++)
+            for (int i = Front; i < newEintersect.Length; i++)
             {
-                p1 = VS[E[i].p1];
-                p2 = VS[E[i].p2];
-                g.DrawLine(blackPen, (float)p1.x, (float)p1.y, (float)p2.x, (float)p2.y);
+                if (!rejected.Contains(i))
+                {
+                    p1 = VS[newEintersect[i].p1];
+                    p2 = VS[newEintersect[i].p2];
+                    g.DrawLine(blackPen, (float)p1.x, (float)p1.y, (float)p2.x, (float)p2.y);
+                }
             }
             for (int i = 0; i < Front; i++)
             {
-                p1 = VS[E[i].p1];
-                p2 = VS[E[i].p2];
-                g.DrawLine(redPen, (float)p1.x, (float)p1.y, (float)p2.x, (float)p2.y);
+                if (!rejected.Contains(i))
+                {
+                    p1 = VS[newEintersect[i].p1];
+                    p2 = VS[newEintersect[i].p2];
+                    g.DrawLine(redPen, (float)p1.x, (float)p1.y, (float)p2.x, (float)p2.y);
+                }
             }
+
+            //for (int i = 0; i < newEintersect.Length; i++)
+            //{
+            //    p1 = VS[newEintersect[i].p1];
+            //    p2 = VS[newEintersect[i].p2];
+            //    g.DrawLine(blackPen, (float)p1.x, (float)p1.y, (float)p2.x, (float)p2.y);
+            //}
+
+            //Pen bluePen = new Pen(Color.Blue);
+            //g.DrawLine(bluePen, new Point(100, 100), new Point(300, 100));
+            //g.DrawLine(bluePen, new Point(300, 100), new Point(300, 300));
+            //g.DrawLine(bluePen, new Point(300, 300), new Point(100, 300));
+            //g.DrawLine(bluePen, new Point(100, 300), new Point(100, 100));
 
             pictureBox1.Image = bmp;
         }
@@ -140,6 +383,8 @@ namespace _3DCGA_PA4
 
         private void drawBtn_Click(object sender, EventArgs e)
         {
+            newV.Clear();
+            rejected.Clear();
             if (objectLoaded == false)
             {
                 MessageBox.Show("OBJECT IS NOT LOADED YET" + Environment.NewLine + "Please load the object first..");
@@ -291,41 +536,101 @@ namespace _3DCGA_PA4
                 for (int i = 0; i < VNum; i++)
                 {
                     VW[i] = multiplyMatrix(V[i], Wt);
-                    VV[i] = multiplyMatrix(VW[i], Vt);
+                    VPr1[i] = multiplyMatrix(VW[i], Pr1);
+                }
+
+                getAllIntersections();
+                createNewVertex();
+                createNewEdge();
+                clipping();
+
+                for (int i = 0; i < newVintersect.Length; i++)
+                {
+                    VV[i] = multiplyMatrix(newVintersect[i], Pr2);
                     VS[i] = multiplyMatrix(VV[i], St);
                 }
 
                 // Debug
                 debugTextBox.Text = "";
-                debugTextBox.AppendText("Viewing parameters:" + Environment.NewLine);
-                debugTextBox.AppendText("1. VRP = (" + VRP.x.ToString() + ", " + VRP.y.ToString() + ", " + VRP.z.ToString() + ")" + Environment.NewLine);
-                debugTextBox.AppendText("2. VPN = (" + VPN.x.ToString() + "   " + VPN.y.ToString() + "   " + VPN.z.ToString() + ")ᵀ" + Environment.NewLine);
-                debugTextBox.AppendText("3. VUP = (" + VUP.x.ToString() + "   " + VUP.y.ToString() + "   " + VUP.z.ToString() + ")ᵀ" + Environment.NewLine);
-                debugTextBox.AppendText("4. COP = (" + COP.x.ToString() + ", " + COP.y.ToString() + ", " + COP.z.ToString() + ")" + Environment.NewLine);
-                debugTextBox.AppendText("5. Window = (" + windowUmin.ToString() + ", " + windowVmin.ToString() + ", " + windowUmax.ToString() + ", " + windowVmax.ToString() + ")" + Environment.NewLine);
-                debugTextBox.AppendText("6. Projection type = Parallel" + Environment.NewLine);
-                debugTextBox.AppendText("7. Front plane = " + FP.ToString() + ", " + "Back plane = " + BP.ToString() + Environment.NewLine);
-                debugTextBox.AppendText(Environment.NewLine);
+                //debugTextBox.AppendText("Viewing parameters:" + Environment.NewLine);
+                //debugTextBox.AppendText("1. VRP = (" + VRP.x.ToString() + ", " + VRP.y.ToString() + ", " + VRP.z.ToString() + ")" + Environment.NewLine);
+                //debugTextBox.AppendText("2. VPN = (" + VPN.x.ToString() + "   " + VPN.y.ToString() + "   " + VPN.z.ToString() + ")ᵀ" + Environment.NewLine);
+                //debugTextBox.AppendText("3. VUP = (" + VUP.x.ToString() + "   " + VUP.y.ToString() + "   " + VUP.z.ToString() + ")ᵀ" + Environment.NewLine);
+                //debugTextBox.AppendText("4. COP = (" + COP.x.ToString() + ", " + COP.y.ToString() + ", " + COP.z.ToString() + ")" + Environment.NewLine);
+                //debugTextBox.AppendText("5. Window = (" + windowUmin.ToString() + ", " + windowVmin.ToString() + ", " + windowUmax.ToString() + ", " + windowVmax.ToString() + ")" + Environment.NewLine);
+                //debugTextBox.AppendText("6. Projection type = Parallel" + Environment.NewLine);
+                //debugTextBox.AppendText("7. Front plane = " + FP.ToString() + ", " + "Back plane = " + BP.ToString() + Environment.NewLine);
+                //debugTextBox.AppendText(Environment.NewLine);
+
+                //debugTextBox.AppendText("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+                //debugTextBox.AppendText(Environment.NewLine);
+                //debugTextBox.AppendText("Derived paremeters" + Environment.NewLine);
+                //debugTextBox.AppendText("1. N = (" + N.x.ToString() + "   " + N.y.ToString() + "   " + N.z.ToString() + ")ᵀ" + Environment.NewLine);
+                //debugTextBox.AppendText("2. upUnit = (" + upUnit.x.ToString() + "   " + upUnit.y.ToString() + "   " + upUnit.z.ToString() + ")ᵀ" + Environment.NewLine);
+                //debugTextBox.AppendText("3. upVec = (" + upVec.x.ToString() + "   " + upVec.y.ToString() + "   " + upVec.z.ToString() + ")ᵀ" + Environment.NewLine);
+                //debugTextBox.AppendText("4. v = (" + v.x.ToString() + "   " + v.y.ToString() + "   " + v.z.ToString() + ")ᵀ" + Environment.NewLine);
+                //debugTextBox.AppendText("5. u = (" + u.x.ToString() + "   " + u.y.ToString() + "   " + u.z.ToString() + ")ᵀ" + Environment.NewLine);
+                //debugTextBox.AppendText("6. DOP = (" + DOP.x.ToString() + "   " + DOP.y.ToString() + "   " + DOP.z.ToString() + ")ᵀ" + Environment.NewLine);
+                //debugTextBox.AppendText("7. CW = (" + CW.x.ToString() + ", " + CW.y.ToString() + ", " + CW.z.ToString() + ")" + Environment.NewLine);
+                //debugTextBox.AppendText(Environment.NewLine);
+
+                //debugTextBox.AppendText("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+                //debugTextBox.AppendText(Environment.NewLine);
+
+                //debugTextBox.AppendText("Points:" + Environment.NewLine);
+                //for (int i = 0; i < VNum; i++)
+                //{
+                //    debugTextBox.AppendText(i + " => " + "(" + VV[i].x + ", " + VV[i].y + ", " + VV[i].z + ")" + Environment.NewLine);
+                //}
+
+                //for (int i = 0; i < newV.Count; i++)
+                //{
+                //    debugTextBox.AppendText(i + " => " + "(" + newV[i].x + ", " + newV[i].y + ", " + newV[i].z + ")" + Environment.NewLine);
+                //}
+
+                //debugTextBox.AppendText("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+                //debugTextBox.AppendText(Environment.NewLine);
+
+                //for (int i = 0; i < newVintersect.Length; i++)
+                //{
+                //    debugTextBox.AppendText(i + " => " + "(" + newVintersect[i].x + ", " + newVintersect[i].y + ", " + newVintersect[i].z + ")" + Environment.NewLine);
+                //}
+
+                //debugTextBox.AppendText("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+                //debugTextBox.AppendText(Environment.NewLine);
+
+                //for (int i = 0; i < newEintersect.Length; i++)
+                //{
+                //    debugTextBox.AppendText(i + " => " + "(" + newEintersect[i].p1 + ", " + newEintersect[i].p2 + ")" + Environment.NewLine);
+                //}
+
+                for (int i = 0; i < newVintersect.Length; i++)
+                {
+                    debugTextBox.AppendText(i + " => " + "(" + newVintersect[i].x + ", " + newVintersect[i].y + ", " + newVintersect[i].z + ")" + Environment.NewLine);
+                }
 
                 debugTextBox.AppendText("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
                 debugTextBox.AppendText(Environment.NewLine);
-                debugTextBox.AppendText("Derived paremeters" + Environment.NewLine);
-                debugTextBox.AppendText("1. N = (" + N.x.ToString() + "   " + N.y.ToString() + "   " + N.z.ToString() + ")ᵀ" + Environment.NewLine);
-                debugTextBox.AppendText("2. upUnit = (" + upUnit.x.ToString() + "   " + upUnit.y.ToString() + "   " + upUnit.z.ToString() + ")ᵀ" + Environment.NewLine);
-                debugTextBox.AppendText("3. upVec = (" + upVec.x.ToString() + "   " + upVec.y.ToString() + "   " + upVec.z.ToString() + ")ᵀ" + Environment.NewLine);
-                debugTextBox.AppendText("4. v = (" + v.x.ToString() + "   " + v.y.ToString() + "   " + v.z.ToString() + ")ᵀ" + Environment.NewLine);
-                debugTextBox.AppendText("5. u = (" + u.x.ToString() + "   " + u.y.ToString() + "   " + u.z.ToString() + ")ᵀ" + Environment.NewLine);
-                debugTextBox.AppendText("6. DOP = (" + DOP.x.ToString() + "   " + DOP.y.ToString() + "   " + DOP.z.ToString() + ")ᵀ" + Environment.NewLine);
-                debugTextBox.AppendText("7. CW = (" + CW.x.ToString() + ", " + CW.y.ToString() + ", " + CW.z.ToString() + ")" + Environment.NewLine);
-                debugTextBox.AppendText(Environment.NewLine);
 
-                debugTextBox.AppendText("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
-                debugTextBox.AppendText(Environment.NewLine);
-
-                debugTextBox.AppendText("Points:" + Environment.NewLine);
-                for (int i = 0; i < VNum; i++)
+                for (int i = 0; i < VV.Length; i++)
                 {
                     debugTextBox.AppendText(i + " => " + "(" + VV[i].x + ", " + VV[i].y + ", " + VV[i].z + ")" + Environment.NewLine);
+                }
+
+                debugTextBox.AppendText("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+                debugTextBox.AppendText(Environment.NewLine);
+
+                for (int i = 0; i < VS.Length; i++)
+                {
+                    debugTextBox.AppendText(i + " => " + "(" + VS[i].x + ", " + VS[i].y + ", " + VS[i].z + ")" + Environment.NewLine);
+                }
+
+                debugTextBox.AppendText("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+                debugTextBox.AppendText(Environment.NewLine);
+
+                for (int i = 0; i < newEintersect.Length; i++)
+                {
+                    debugTextBox.AppendText(i + " => " + "(" + newEintersect[i].p1 + ", " + newEintersect[i].p2 + ")" + Environment.NewLine);
                 }
 
                 // Draw object on the screen
@@ -454,17 +759,19 @@ namespace _3DCGA_PA4
                 while ((line = sr.ReadLine()) != null)
                 {
                     string[] lineSplit = line.Split(',');
-                    if(lineSplit[0] == "ObjectName")
+                    if (lineSplit[0] == "ObjectName")
                     {
                         objectNameTextBox.Text = "Object: " + lineSplit[1];
                     }
-                    else if(lineSplit[0] == "VNum")
+                    else if (lineSplit[0] == "VNum")
                     {
                         VNum = Convert.ToInt32(lineSplit[1]);
                         V = new TPoint[VNum];
                         VW = new TPoint[VNum];
-                        VV = new TPoint[VNum];
-                        VS = new TPoint[VNum];
+                        //VV = new TPoint[VNum];
+                        //VS = new TPoint[VNum];
+
+                        VPr1 = new TPoint[VNum];
                     }
                     else if (lineSplit[0] == "ENum")
                     {
