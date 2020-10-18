@@ -29,8 +29,8 @@ namespace _3DCGA_PA4
 
         TPoint[] V;
         TPoint[] VW;
-        TPoint[] VV = new TPoint[30];
-        TPoint[] VS = new TPoint[30];
+        TPoint[] VV;
+        TPoint[] VS;
         TLine[] E;
 
         double[,] Wt = new double[4, 4];
@@ -50,8 +50,8 @@ namespace _3DCGA_PA4
         double[,] Pr2 = new double[4, 4];
 
         TPoint[] VPr1;
-        TLine[] newEintersect = new TLine[15];
-        TPoint[] newVintersect = new TPoint[30];
+        TLine[] newEintersect;
+        TPoint[] newVintersect;
 
         List<TPoint> newV = new List<TPoint>();
         List<int> edgeTest = new List<int>();
@@ -768,15 +768,16 @@ namespace _3DCGA_PA4
                         VNum = Convert.ToInt32(lineSplit[1]);
                         V = new TPoint[VNum];
                         VW = new TPoint[VNum];
-                        //VV = new TPoint[VNum];
-                        //VS = new TPoint[VNum];
-
                         VPr1 = new TPoint[VNum];
+                        VV = new TPoint[VNum*3];
+                        VS = new TPoint[VNum*3];
+                        newVintersect = new TPoint[VNum*3];
                     }
                     else if (lineSplit[0] == "ENum")
                     {
                         ENum = Convert.ToInt32(lineSplit[1]);
                         E = new TLine[ENum];
+                        newEintersect = new TLine[ENum];
                     }
                     else if (lineSplit[0] == "Point")
                     {
