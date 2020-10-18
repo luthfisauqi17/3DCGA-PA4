@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form1));
             this.label1 = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
             this.label3 = new System.Windows.Forms.Label();
@@ -63,6 +64,8 @@
             this.defaultSettingsBtn = new System.Windows.Forms.Button();
             this.drawBtn = new System.Windows.Forms.Button();
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
+            this.boundaryboxCheckBox = new System.Windows.Forms.CheckBox();
+            this.label11 = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.SuspendLayout();
             // 
@@ -401,11 +404,32 @@
             this.pictureBox1.TabIndex = 0;
             this.pictureBox1.TabStop = false;
             // 
+            // boundaryboxCheckBox
+            // 
+            this.boundaryboxCheckBox.AutoSize = true;
+            this.boundaryboxCheckBox.Location = new System.Drawing.Point(650, 212);
+            this.boundaryboxCheckBox.Name = "boundaryboxCheckBox";
+            this.boundaryboxCheckBox.Size = new System.Drawing.Size(117, 21);
+            this.boundaryboxCheckBox.TabIndex = 26;
+            this.boundaryboxCheckBox.Text = "Boundary box";
+            this.boundaryboxCheckBox.UseVisualStyleBackColor = true;
+            // 
+            // label11
+            // 
+            this.label11.AutoSize = true;
+            this.label11.Location = new System.Drawing.Point(452, 446);
+            this.label11.Name = "label11";
+            this.label11.Size = new System.Drawing.Size(284, 34);
+            this.label11.TabIndex = 27;
+            this.label11.Text = "*You haven\'t load the object yet!\r\nplease load the object from /assets/Objects/";
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(829, 774);
+            this.Controls.Add(this.label11);
+            this.Controls.Add(this.boundaryboxCheckBox);
             this.Controls.Add(this.objectNameTextBox);
             this.Controls.Add(this.saveLogBtn);
             this.Controls.Add(this.loadObjectBtn);
@@ -442,9 +466,11 @@
             this.Controls.Add(this.label1);
             this.Controls.Add(this.pictureBox1);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.Name = "Form1";
             this.Text = "3DCGA-PA4";
+            this.Load += new System.EventHandler(this.Form1_Load);
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
@@ -488,6 +514,8 @@
         private System.Windows.Forms.Button loadObjectBtn;
         private System.Windows.Forms.Button saveLogBtn;
         private System.Windows.Forms.Label objectNameTextBox;
+        private System.Windows.Forms.CheckBox boundaryboxCheckBox;
+        private System.Windows.Forms.Label label11;
     }
 }
 

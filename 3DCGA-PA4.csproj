@@ -33,6 +33,10 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
+  <PropertyGroup />
+  <PropertyGroup>
+    <ApplicationIcon>Designcontest-Outline-3D.ico</ApplicationIcon>
+  </PropertyGroup>
   <PropertyGroup>
     <ApplicationManifest>app.manifest</ApplicationManifest>
   </PropertyGroup>
@@ -93,6 +97,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="assets\icon\application-default-icon.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Designcontest-Outline-3D.ico" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
