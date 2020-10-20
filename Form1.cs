@@ -10,21 +10,21 @@ namespace _3DCGA_PA4
     public partial class Form1 : Form
     {
         #region Structs
-        public struct TPoint
+        public struct TPoint // Define TPoint data structure.
         {
             public double x, y, z, w;
         }
 
-        public struct TLine
+        public struct TLine // Define TLine data structure.
         {
             public int p1, p2;
         }
         #endregion
 
         #region Global variables
+        // The details of each variables is in the report.
         Bitmap bmp;
         Graphics g;
-
         int Front, VNum, ENum;
         double windowUmin, windowVmin, windowUmax, windowVmax, FP, BP, rx, ry, rz, shx, shy, dx, dy, dz, sx, sy, sz;
         bool objectLoaded = false;
@@ -52,7 +52,8 @@ namespace _3DCGA_PA4
         #endregion
 
         #region Functions
-        public void setPoint(ref TPoint V, double x, double y, double z)
+        // This function is to set Point values.
+        public void setPoint(ref TPoint V, double x, double y, double z) 
         {
             V.x = x;
             V.y = y;
@@ -60,13 +61,15 @@ namespace _3DCGA_PA4
             V.w = 1;
         }
 
-        public void setLine(ref TLine E, int p1, int p2)
+        // This function is to set Line values.
+        public void setLine(ref TLine E, int p1, int p2) 
         {
             E.p1 = p1;
             E.p2 = p2;
         }
 
-        public void setRowMatrix(ref double[,] M, int row, double a, double b, double c, double d)
+        // This function is to set matrix values.
+        public void setRowMatrix(ref double[,] M, int row, double a, double b, double c, double d)  
         {
             M[row, 0] = a;
             M[row, 1] = b;
@@ -74,6 +77,7 @@ namespace _3DCGA_PA4
             M[row, 3] = d;
         }
 
+        // This function is to multiply point and 4x4 matrix.
         public TPoint multiplyMatrix(TPoint P, double[,] M)
         {
             TPoint temp;
@@ -85,6 +89,7 @@ namespace _3DCGA_PA4
             return temp;
         }
 
+        // This function is to multiply 4x4 matrix and 4x4 matrix.
         public double[,] matrixMultiplication(double[,] M1, double[,] M2)
         {
             double[,] temp = new double[4, 4];
@@ -102,6 +107,7 @@ namespace _3DCGA_PA4
             return temp;
         }
 
+        // This function is to create new array of vertices after getting all intersections.
         public void createNewVertex()
         {
             for (int i = 0; i < newVintersect.Length; i++)
@@ -110,6 +116,7 @@ namespace _3DCGA_PA4
             }
         }
 
+        // This function is to create new array of edges after we create the new vertices.
         public void createNewEdge()
         {
             for (int i = 0; i < newEintersect.Length; i++)
@@ -118,6 +125,7 @@ namespace _3DCGA_PA4
             }
         }
 
+        // This function is to get areacode from the endpoints of a line.
         public int getAreaCode(TPoint P)
         {
             int n = 0;
@@ -134,30 +142,34 @@ namespace _3DCGA_PA4
             return n;
         }
 
+        // This function is to get all intersection from all edges.
         public void getAllIntersections()
         {
             for (int i = 0; i < ENum; i++)
             {
-                TPoint p1 = VPr1[E[i].p1];
+                // Endpoints of a line / edge.
+                TPoint p1 = VPr1[E[i].p1]; 
                 TPoint p2 = VPr1[E[i].p2];
-                int c1 = getAreaCode(p1);
+                // Get area code from each endpoints.
+                int c1 = getAreaCode(p1); 
                 int c2 = getAreaCode(p2);
-                if ((c1 | c2) == 0)
+                if ((c1 | c2) == 0) // Trivially accepted.
                 {
                     newV.Add(p1);
                     newV.Add(p2);
                 }
-                else if ((c1 & c2) == c1 && (c1 & c2) == c2)
+                else if ((c1 & c2) == c1 && (c1 & c2) == c2) // Trivially rejected.
                 {
                     newV.Add(p1);
                     newV.Add(p2);
                 }
-                else if ((c1 | c2) != 0)
+                else if ((c1 | c2) != 0) // Possible to be accepted or rejected.
                 {
-                    while ((c1 | c2) != 0)
+                    while ((c1 | c2) != 0) // Loop until either one of the areacode of endpoints is equal to 0 .
                     {
+                        // Using parametric line equation.
                         double t, ppx, ppy, ppz;
-                        if ((c1 | c2) >= 32) // Intersect with front
+                        if ((c1 | c2) >= 32) // Intersect with front.
                         {
                             if (c1 > c2)
                             {
@@ -177,7 +189,7 @@ namespace _3DCGA_PA4
                             }
                         }
 
-                        else if ((c1 | c2) >= 16 && (c1 | c2) < 32) // Intersect with behind
+                        else if ((c1 | c2) >= 16 && (c1 | c2) < 32) // Intersect with behind.
                         {
                             if (c1 > c2)
                             {
@@ -197,7 +209,7 @@ namespace _3DCGA_PA4
                             }
                         }
 
-                        else if ((c1 | c2) >= 8 && (c1 | c2) < 16) // Intersect with top
+                        else if ((c1 | c2) >= 8 && (c1 | c2) < 16) // Intersect with top.
                         {
                             if (c1 > c2)
                             {
@@ -217,7 +229,7 @@ namespace _3DCGA_PA4
                             }
                         }
 
-                        else if ((c1 | c2) >= 4 && (c1 | c2) < 8) // Intersect with bottom
+                        else if ((c1 | c2) >= 4 && (c1 | c2) < 8) // Intersect with bottom.
                         {
                             if (c1 > c2)
                             {
@@ -237,7 +249,7 @@ namespace _3DCGA_PA4
                             }
                         }
 
-                        else if ((c1 | c2) >= 2 && (c1 | c2) < 4) // Intersect with right
+                        else if ((c1 | c2) >= 2 && (c1 | c2) < 4) // Intersect with right.
                         {
                             if (c1 > c2)
                             {
@@ -257,7 +269,7 @@ namespace _3DCGA_PA4
                             }
                         }
 
-                        else if ((c1 | c2) >= 1 && (c1 | c2) < 2) // Intersect with left
+                        else if ((c1 | c2) >= 1 && (c1 | c2) < 2) // Intersect with left.
                         {
                             if (c1 > c2)
                             {
@@ -276,15 +288,17 @@ namespace _3DCGA_PA4
                                 p2.x = -1;
                             }
                         }
+                        
+                        // Calculate areacodes again after we find the intersection.
                         c1 = getAreaCode(p1);
                         c2 = getAreaCode(p2);
-                        if ((c1 | c2) == 0)
+                        if ((c1 | c2) == 0) // Trivially accepted.
                         {
                             newV.Add(p1);
                             newV.Add(p2);
                             break;
                         }
-                        else if ((c1 & c2) == c1 && (c1 & c2) == c2)
+                        else if ((c1 & c2) == c1 && (c1 & c2) == c2) // Trivially rejected.
                         {
                             newV.Add(p1);
                             newV.Add(p2);
@@ -295,6 +309,7 @@ namespace _3DCGA_PA4
             }
         }
 
+        // This function is to mark which index of the new edge is rejected.
         public void clipping()
         {
             for (int i = 0; i < newEintersect.Length; i++)
@@ -303,17 +318,18 @@ namespace _3DCGA_PA4
                 TPoint p2 = newVintersect[newEintersect[i].p2];
                 int c1 = getAreaCode(p1);
                 int c2 = getAreaCode(p2);
-                if ((c1 | c2) == 0)
+                if ((c1 | c2) == 0) // If it trivially accepted, then continue to the next iteration.
                 {
                     continue;
                 }
-                else if ((c1 & c2) == c1 && (c1 & c2) == c2)
+                else if ((c1 & c2) == c1 && (c1 & c2) == c2) // Else, if it trivially rejected, then mark the index of the edge by add the index to the rejected list.
                 {
                     rejected.Add(i);
                 }
             }
         }
 
+        // This function is to draw the object.
         public void draw()
         {
             bmp = new Bitmap(pictureBox1.Width, pictureBox1.Height);
@@ -324,7 +340,7 @@ namespace _3DCGA_PA4
             TPoint p1, p2;
             for (int i = Front; i < newEintersect.Length; i++)
             {
-                if (!rejected.Contains(i))
+                if (!rejected.Contains(i)) // If the index is in the rejected list, then skip it.
                 {
                     p1 = VS[newEintersect[i].p1];
                     p2 = VS[newEintersect[i].p2];
@@ -341,6 +357,7 @@ namespace _3DCGA_PA4
                 }
             }
 
+            // This is to draw the boundary box.
             if (boundaryboxCheckBox.Checked)
             {
                 Pen bluePen = new Pen(Color.Blue);
@@ -350,14 +367,19 @@ namespace _3DCGA_PA4
                 g.DrawLine(bluePen, new Point(100, 300), new Point(100, 100));
             }
 
-            pictureBox1.Image = bmp;
+            pictureBox1.Image = bmp; // Display it into the screen.
         }
 
+        /// <summary>
+        /// This is the main function.
+        /// In this function, we calculate all variables used for processing from the WCS until the SCS.
+        /// </summary>
         public void display()
         {
+            // Clearing all list.
             newV.Clear();
             rejected.Clear();
-            // Assigning variables value from the textboxes
+            // Assigning variables value from the textboxes.
             setPoint(ref VRP, Convert.ToDouble(VRPxTextBox.Text), Convert.ToDouble(VRPyTextBox.Text), Convert.ToDouble(VRPzTextBox.Text));
             setPoint(ref VPN, Convert.ToDouble(VPNxTextBox.Text), Convert.ToDouble(VPNyTextBox.Text), Convert.ToDouble(VPNzTextBox.Text));
             setPoint(ref VUP, Convert.ToDouble(VUPxTextBox.Text), Convert.ToDouble(VUPyTextBox.Text), Convert.ToDouble(VUPzTextBox.Text));
@@ -369,42 +391,42 @@ namespace _3DCGA_PA4
             FP = Convert.ToDouble(FPTextBox.Text);
             BP = Convert.ToDouble(BPTextBox.Text);
 
-            // Creating temporary variables
+            // Creating temporary variables.
             double temp;
             TPoint tempPoint = new TPoint(); ;
 
-            // Calculating N unit vector
+            // Calculating N unit vector.
             temp = Math.Sqrt(Math.Pow(VPN.x, 2) + Math.Pow(VPN.y, 2) + Math.Pow(VPN.z, 2));
             setPoint(ref N, VPN.x / temp, VPN.y / temp, VPN.z / temp);
 
-            // Calculating up unit vector
+            // Calculating up unit vector.
             temp = Math.Sqrt(Math.Pow(VUP.x, 2) + Math.Pow(VUP.y, 2) + Math.Pow(VUP.z, 2));
             setPoint(ref upUnit, VUP.x / temp, VUP.y / temp, VUP.z / temp);
 
-            // Calculating up vector
+            // Calculating up vector.
             temp = upUnit.x * N.x + upUnit.y * N.y + upUnit.z * N.z;
             tempPoint.x = temp * N.x;
             tempPoint.y = temp * N.y;
             tempPoint.z = temp * N.z;
             setPoint(ref upVec, upUnit.x - tempPoint.x, upUnit.y - tempPoint.y, upUnit.z - tempPoint.z);
 
-            // Calculating v unit vector
+            // Calculating v unit vector.
             temp = Math.Sqrt(Math.Pow(upVec.x, 2) + Math.Pow(upVec.y, 2) + Math.Pow(upVec.z, 2));
             setPoint(ref v, upVec.x / temp, upVec.y / temp, upVec.z / temp);
 
-            // Calculating u unit vector
+            // Calculating u unit vector.
             tempPoint.x = (v.y * N.z) - (N.y * v.z);
             tempPoint.y = (v.z * N.x) - (N.z * v.x);
             tempPoint.z = (v.x * N.y) - (N.x * v.y);
             setPoint(ref u, tempPoint.x, tempPoint.y, tempPoint.z);
 
-            // Calculating CW (Center of Window)
+            // Calculating CW (Center of Window).
             setPoint(ref CW, (windowUmax + windowUmin) / 2, (windowVmax + windowVmin) / 2, 0);
 
-            // Calculating DOP (Direction of projection)
+            // Calculating DOP (Direction of projection).
             setPoint(ref DOP, (CW.x - COP.x), (CW.y - COP.y), (CW.z - COP.z));
 
-            // Creating transformation matrix 1, Translate VRP to the origin (0, 0, 0)WCS
+            // Creating transformation matrix 1, Translate VRP to the origin (0, 0, 0)WCS.
             rx = VRP.x;
             ry = VRP.y;
             rz = VRP.z;
@@ -413,13 +435,13 @@ namespace _3DCGA_PA4
             setRowMatrix(ref T1, 2, 0, 0, 1, 0);
             setRowMatrix(ref T1, 3, -rx, -ry, -rz, 1);
 
-            // Creating transformation matrix 2, rotate VCS such that u, v, N aligned with x, y, z axes
+            // Creating transformation matrix 2, rotate VCS such that u, v, N aligned with x, y, z axes.
             setRowMatrix(ref T2, 0, u.x, v.x, N.x, 0);
             setRowMatrix(ref T2, 1, u.y, v.y, N.y, 0);
             setRowMatrix(ref T2, 2, u.z, v.z, N.z, 0);
             setRowMatrix(ref T2, 3, 0, 0, 0, 1);
 
-            // Creating transformation matrix 3, shear such that the DOP become parallel to z-axis
+            // Creating transformation matrix 3, shear such that the DOP become parallel to z-axis.
             shx = -DOP.x / DOP.z;
             shy = -DOP.y / DOP.z;
             setRowMatrix(ref T3, 0, 1, 0, 0, 0);
@@ -427,7 +449,7 @@ namespace _3DCGA_PA4
             setRowMatrix(ref T3, 2, shx, shy, 1, 0);
             setRowMatrix(ref T3, 3, 0, 0, 0, 1);
 
-            // Creating transformation matrix 4, Translate the FP to the origin
+            // Creating transformation matrix 4, Translate the FP to the origin.
             dx = -CW.x;
             dy = -CW.y;
             dz = -FP;
@@ -436,7 +458,7 @@ namespace _3DCGA_PA4
             setRowMatrix(ref T4, 2, 0, 0, 1, 0);
             setRowMatrix(ref T4, 3, dx, dy, dz, 1);
 
-            // Creating transformation matrix 5, scale so that BP will become -1, and window become -1, -1, 1, 1
+            // Creating transformation matrix 5, scale so that BP will become -1, and window become -1, -1, 1, 1.
             sx = 2 / (windowUmax - windowUmin);
             sy = 2 / (windowVmax - windowVmin);
             sz = 1 / (FP - BP);
@@ -445,41 +467,42 @@ namespace _3DCGA_PA4
             setRowMatrix(ref T5, 2, 0, 0, sz, 0);
             setRowMatrix(ref T5, 3, 0, 0, 0, 1);
 
-            // Creating Pr1 matrix which is the result of all transformation matrix multiplication
+            // Creating Pr1 matrix which is the result of all transformation matrix multiplication.
             Pr1 = matrixMultiplication(matrixMultiplication(matrixMultiplication(matrixMultiplication(T1, T2), T3), T4), T5);
 
-            // Creating Pr2 which is matrix for view projection
+            // Creating Pr2 which is matrix for view projection.
             setRowMatrix(ref Pr2, 0, 1, 0, 0, 0);
             setRowMatrix(ref Pr2, 1, 0, 1, 0, 0);
             setRowMatrix(ref Pr2, 2, 0, 0, 0, 0);
             setRowMatrix(ref Pr2, 3, 0, 0, 0, 1);
 
-            // Creating World transformation matrix
+            // Creating World transformation matrix.
             setRowMatrix(ref Wt, 0, 1, 0, 0, 0);
             setRowMatrix(ref Wt, 1, 0, 1, 0, 0);
             setRowMatrix(ref Wt, 2, 0, 0, 1, 0);
             setRowMatrix(ref Wt, 3, 0, 0, 0, 1);
 
-            // Creating view transformation matrix
+            // Creating view transformation matrix.
             Vt = matrixMultiplication(Pr1, Pr2);
 
-            // Creating screen transformation matrix
+            // Creating screen transformation matrix.
             setRowMatrix(ref St, 0, 100, 0, 0, 0);
             setRowMatrix(ref St, 1, 0, -100, 0, 0);
             setRowMatrix(ref St, 2, 0, 0, 0, 0);
             setRowMatrix(ref St, 3, 200, 200, 0, 1);
 
-            // Multiply all point with Wt, Vt, and St
+
+            // Multiply all point with Wt, Vt, and St.
             for (int i = 0; i < VNum; i++)
             {
                 VW[i] = multiplyMatrix(V[i], Wt);
                 VPr1[i] = multiplyMatrix(VW[i], Pr1);
             }
 
-            getAllIntersections();
-            createNewVertex();
-            createNewEdge();
-            clipping();
+            getAllIntersections(); // Get all intersection for clipping.
+            createNewVertex(); // Create new clipped vertices.
+            createNewEdge(); // Create new clipped edges from the new clipped vertices.
+            clipping(); // Decide which new clipped edges is rejected.
 
             for (int i = 0; i < newVintersect.Length; i++)
             {
@@ -487,7 +510,8 @@ namespace _3DCGA_PA4
                 VS[i] = multiplyMatrix(VV[i], St);
             }
 
-            // Debug
+
+            // Debug.
             debugTextBox.Text = "";
             debugTextBox.AppendText("Viewing parameters:" + Environment.NewLine);
             debugTextBox.AppendText("1. VRP = (" + VRP.x.ToString() + ", " + VRP.y.ToString() + ", " + VRP.z.ToString() + ")" + Environment.NewLine);
@@ -501,7 +525,7 @@ namespace _3DCGA_PA4
 
             debugTextBox.AppendText("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
             debugTextBox.AppendText(Environment.NewLine);
-            debugTextBox.AppendText("Derived paremeters" + Environment.NewLine);
+            debugTextBox.AppendText("Others:" + Environment.NewLine);
             debugTextBox.AppendText("1. N = (" + N.x.ToString() + "   " + N.y.ToString() + "   " + N.z.ToString() + ")ᵀ" + Environment.NewLine);
             debugTextBox.AppendText("2. upUnit = (" + upUnit.x.ToString() + "   " + upUnit.y.ToString() + "   " + upUnit.z.ToString() + ")ᵀ" + Environment.NewLine);
             debugTextBox.AppendText("3. upVec = (" + upVec.x.ToString() + "   " + upVec.y.ToString() + "   " + upVec.z.ToString() + ")ᵀ" + Environment.NewLine);
@@ -520,7 +544,7 @@ namespace _3DCGA_PA4
                 debugTextBox.AppendText(i + " => " + "(" + VV[i].x + ", " + VV[i].y + ", " + VV[i].z + ")" + Environment.NewLine);
             }
 
-            // Draw object on the screen
+            // Draw object on the screen.
             draw();
         }
         #endregion
@@ -531,11 +555,13 @@ namespace _3DCGA_PA4
             InitializeComponent();
         }
 
+        // This function is to draw the object / run the main function if we click the button.
         private void drawBtn_Click(object sender, EventArgs e)
         {
             display();
         }
 
+        // This function is to return to the default parameters if we click the button.
         private void defaultSettingsBtn_Click(object sender, EventArgs e)
         {
             VRPxTextBox.Text = "0";
@@ -561,8 +587,11 @@ namespace _3DCGA_PA4
 
             FPTextBox.Text = "2";
             BPTextBox.Text = "-2";
+
+            display();
         }
 
+        // This button is to save the debug log, for the debug info purposes.
         private void saveLogBtn_Click(object sender, EventArgs e)
         {
             SaveFileDialog sd = new SaveFileDialog
@@ -575,7 +604,7 @@ namespace _3DCGA_PA4
                 FilterIndex = 2,
                 RestoreDirectory = true,
             };
-            if (sd.ShowDialog() == DialogResult.OK)
+            if (sd.ShowDialog() == DialogResult.OK) // If we click the "ok" button.
             {
 
                 try
@@ -586,7 +615,7 @@ namespace _3DCGA_PA4
                         File.Delete(sd.FileName);
                     }
 
-                    // Create a new file     
+                    // Create a new file.     
                     using (StreamWriter sw = File.CreateText(sd.FileName))
                     {
                         sw.Write("Viewing parameters:" + Environment.NewLine);
@@ -601,7 +630,7 @@ namespace _3DCGA_PA4
 
                         sw.Write("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
                         sw.Write(Environment.NewLine);
-                        sw.Write("Derived paremeters" + Environment.NewLine);
+                        sw.Write("Others:" + Environment.NewLine);
                         sw.Write("1. N = (" + N.x.ToString() + "   " + N.y.ToString() + "   " + N.z.ToString() + ")ᵀ" + Environment.NewLine);
                         sw.Write("2. upUnit = (" + upUnit.x.ToString() + "   " + upUnit.y.ToString() + "   " + upUnit.z.ToString() + ")ᵀ" + Environment.NewLine);
                         sw.Write("3. upVec = (" + upVec.x.ToString() + "   " + upVec.y.ToString() + "   " + upVec.z.ToString() + ")ᵀ" + Environment.NewLine);
@@ -631,31 +660,31 @@ namespace _3DCGA_PA4
             }
         }
 
+        // This function is to load the object from the txt file.
         private void loadObjectBtn_Click(object sender, EventArgs e)
         {
-            OpenFileDialog ofd = new OpenFileDialog // Create an object from the OpenFileDialog Class
+            OpenFileDialog ofd = new OpenFileDialog // Create an object from the OpenFileDialog Class.
             {
-                InitialDirectory = @"D:\", // Initial directory when the dialogbox open for the first time
-                Title = "Browse Text Files", // Dialogbox title
+                InitialDirectory = @"D:\", // Initial directory when the dialogbox open for the first time.
+                Title = "Browse Text Files", // Dialogbox title.
 
-                CheckFileExists = true, // Check if the file exist
-                CheckPathExists = true, // Check if the path exist
+                CheckFileExists = true, // Check if the file exist.
+                CheckPathExists = true, // Check if the path exist.
 
-                DefaultExt = "txt", // Default file extension
-                Filter = "txt files (*.txt)|*.txt", // File extension filter
+                DefaultExt = "txt", // Default file extension.
+                Filter = "txt files (*.txt)|*.txt", // File extension filter.
 
-                ReadOnlyChecked = true, // Read file only
-                ShowReadOnly = true // Only for reading the file
+                ReadOnlyChecked = true, // Read file only.
+                ShowReadOnly = true // Only for reading the file.
             };
-            if (ofd.ShowDialog() == DialogResult.OK) // If the user click open
+            if (ofd.ShowDialog() == DialogResult.OK) // If the user click open.
             {
-                var sr = new StreamReader(ofd.FileName); // make a variable from the StreamReader Class
-                string line; // this variable will hold the current line from the file
-                objectLoaded = true;
+                var sr = new StreamReader(ofd.FileName); // make a variable from the StreamReader Class.
+                string line; // this variable will hold the current line from the file.
 
                 while ((line = sr.ReadLine()) != null)
                 {
-                    string[] lineSplit = line.Split(',');
+                    string[] lineSplit = line.Split(','); // Split the line, and check each first item of the line split.
                     if (lineSplit[0] == "ObjectName")
                     {
                         objectNameTextBox.Text = "Object: " + lineSplit[1];
@@ -689,8 +718,10 @@ namespace _3DCGA_PA4
                         Front = Convert.ToInt32(lineSplit[1]);
                     }
                 }
+                objectLoaded = true; // The object is loaded.
+                display();
             }
-            if (objectLoaded)
+            if (objectLoaded) // If the object is loaded.
             {
                 objectNameTextBox.BackColor = Color.LightGreen;
                 drawBtn.Enabled = true;
@@ -699,6 +730,7 @@ namespace _3DCGA_PA4
             }
         }
 
+        // This function is to execute code when first time the form loaded.
         private void Form1_Load(object sender, EventArgs e)
         {
             objectNameTextBox.BackColor = Color.LightCoral;
@@ -706,6 +738,7 @@ namespace _3DCGA_PA4
             boundaryboxCheckBox.Enabled = false;
         }
 
+        // This function is to run main function when the checkbox is checked.
         private void boundaryboxCheckBox_CheckedChanged(object sender, EventArgs e)
         {
             display();
