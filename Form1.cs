@@ -26,42 +26,28 @@ namespace _3DCGA_PA4
         Graphics g;
 
         int Front, VNum, ENum;
-
+        double windowUmin, windowVmin, windowUmax, windowVmax, FP, BP, rx, ry, rz, shx, shy, dx, dy, dz, sx, sy, sz;
+        bool objectLoaded = false;
         TPoint[] V;
         TPoint[] VW;
         TPoint[] VV;
         TPoint[] VS;
         TLine[] E;
-
+        TPoint[] VPr1;
+        TLine[] newEintersect;
+        TPoint[] newVintersect;
         double[,] Wt = new double[4, 4];
         double[,] Vt = new double[4, 4];
         double[,] St = new double[4, 4];
-        TPoint VRP, VPN, VUP, COP, N, upUnit, upVec, v, u, DOP, CW = new TPoint();
-        double windowUmin, windowVmin, windowUmax, windowVmax, FP, BP, rx, ry, rz, shx, shy, dx, dy, dz, sx, sy, sz;
-
-        bool objectLoaded = false;
-
         double[,] T1 = new double[4, 4];
-
-        private void Form1_Load(object sender, EventArgs e)
-        {
-            objectNameTextBox.BackColor = Color.LightCoral;
-            drawBtn.Enabled = false;
-        }
-
         double[,] T2 = new double[4, 4];
         double[,] T3 = new double[4, 4];
         double[,] T4 = new double[4, 4];
         double[,] T5 = new double[4, 4];
         double[,] Pr1 = new double[4, 4];
         double[,] Pr2 = new double[4, 4];
-
-        TPoint[] VPr1;
-        TLine[] newEintersect;
-        TPoint[] newVintersect;
-
+        TPoint VRP, VPN, VUP, COP, N, upUnit, upVec, v, u, DOP, CW = new TPoint();
         List<TPoint> newV = new List<TPoint>();
-        List<int> edgeTest = new List<int>();
         List<int> rejected = new List<int>();
         #endregion
 
@@ -160,15 +146,11 @@ namespace _3DCGA_PA4
                 {
                     newV.Add(p1);
                     newV.Add(p2);
-                    edgeTest.Add(E[i].p1);
-                    edgeTest.Add(E[i].p2);
                 }
                 else if ((c1 & c2) == c1 && (c1 & c2) == c2)
                 {
                     newV.Add(p1);
                     newV.Add(p2);
-                    edgeTest.Add(E[i].p1);
-                    edgeTest.Add(E[i].p2);
                 }
                 else if ((c1 | c2) != 0)
                 {
@@ -298,20 +280,14 @@ namespace _3DCGA_PA4
                         c2 = getAreaCode(p2);
                         if ((c1 | c2) == 0)
                         {
-                            //debugTextBox.AppendText("Accepted");
                             newV.Add(p1);
                             newV.Add(p2);
-                            edgeTest.Add(E[i].p1);
-                            edgeTest.Add(E[i].p2);
                             break;
                         }
                         else if ((c1 & c2) == c1 && (c1 & c2) == c2)
                         {
-                            //debugTextBox.AppendText("Rejected");
                             newV.Add(p1);
                             newV.Add(p2);
-                            edgeTest.Add(E[i].p1);
-                            edgeTest.Add(E[i].p2);
                             break;
                         }
                     }
@@ -376,15 +352,8 @@ namespace _3DCGA_PA4
 
             pictureBox1.Image = bmp;
         }
-        #endregion
 
-        #region Main code
-        public Form1()
-        {
-            InitializeComponent();
-        }
-
-        private void drawBtn_Click(object sender, EventArgs e)
+        public void display()
         {
             newV.Clear();
             rejected.Clear();
@@ -485,35 +454,6 @@ namespace _3DCGA_PA4
             setRowMatrix(ref Pr2, 2, 0, 0, 0, 0);
             setRowMatrix(ref Pr2, 3, 0, 0, 0, 1);
 
-            // Assigning all vertices
-            //setPoint(ref V[0], -1, -1, 1);
-            //setPoint(ref V[1], 1, -1, 1);
-            //setPoint(ref V[2], 1, 0, 1);
-            //setPoint(ref V[3], 0, 1, 1);
-            //setPoint(ref V[4], -1, 0, 1);
-            //setPoint(ref V[5], -1, -1, -1);
-            //setPoint(ref V[6], 1, -1, -1);
-            //setPoint(ref V[7], 1, 0, -1);
-            //setPoint(ref V[8], 0, 1, -1);
-            //setPoint(ref V[9], -1, 0, -1);
-
-            // Assigning all edges
-            //setLine(ref E[0], 0, 1);
-            //setLine(ref E[1], 1, 2);
-            //setLine(ref E[2], 2, 3);
-            //setLine(ref E[3], 3, 4);
-            //setLine(ref E[4], 4, 0);
-            //setLine(ref E[5], 5, 6);
-            //setLine(ref E[6], 6, 7);
-            //setLine(ref E[7], 7, 8);
-            //setLine(ref E[8], 8, 9);
-            //setLine(ref E[9], 9, 5);
-            //setLine(ref E[10], 0, 5);
-            //setLine(ref E[11], 1, 6);
-            //setLine(ref E[12], 2, 7);
-            //setLine(ref E[13], 3, 8);
-            //setLine(ref E[14], 4, 9);
-
             // Creating World transformation matrix
             setRowMatrix(ref Wt, 0, 1, 0, 0, 0);
             setRowMatrix(ref Wt, 1, 0, 1, 0, 0);
@@ -580,59 +520,20 @@ namespace _3DCGA_PA4
                 debugTextBox.AppendText(i + " => " + "(" + VV[i].x + ", " + VV[i].y + ", " + VV[i].z + ")" + Environment.NewLine);
             }
 
-            //for (int i = 0; i < newV.Count; i++)
-            //{
-            //    debugTextBox.AppendText(i + " => " + "(" + newV[i].x + ", " + newV[i].y + ", " + newV[i].z + ")" + Environment.NewLine);
-            //}
-
-            //debugTextBox.AppendText("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
-            //debugTextBox.AppendText(Environment.NewLine);
-
-            //for (int i = 0; i < newVintersect.Length; i++)
-            //{
-            //    debugTextBox.AppendText(i + " => " + "(" + newVintersect[i].x + ", " + newVintersect[i].y + ", " + newVintersect[i].z + ")" + Environment.NewLine);
-            //}
-
-            //debugTextBox.AppendText("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
-            //debugTextBox.AppendText(Environment.NewLine);
-
-            //for (int i = 0; i < newEintersect.Length; i++)
-            //{
-            //    debugTextBox.AppendText(i + " => " + "(" + newEintersect[i].p1 + ", " + newEintersect[i].p2 + ")" + Environment.NewLine);
-            //}
-
-            //for (int i = 0; i < newVintersect.Length; i++)
-            //{
-            //    debugTextBox.AppendText(i + " => " + "(" + newVintersect[i].x + ", " + newVintersect[i].y + ", " + newVintersect[i].z + ")" + Environment.NewLine);
-            //}
-
-            //debugTextBox.AppendText("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
-            //debugTextBox.AppendText(Environment.NewLine);
-
-            //for (int i = 0; i < VV.Length; i++)
-            //{
-            //    debugTextBox.AppendText(i + " => " + "(" + VV[i].x + ", " + VV[i].y + ", " + VV[i].z + ")" + Environment.NewLine);
-            //}
-
-            //debugTextBox.AppendText("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
-            //debugTextBox.AppendText(Environment.NewLine);
-
-            //for (int i = 0; i < VS.Length; i++)
-            //{
-            //    debugTextBox.AppendText(i + " => " + "(" + VS[i].x + ", " + VS[i].y + ", " + VS[i].z + ")" + Environment.NewLine);
-            //}
-
-            //debugTextBox.AppendText("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
-            //debugTextBox.AppendText(Environment.NewLine);
-
-            //for (int i = 0; i < newEintersect.Length; i++)
-            //{
-            //    debugTextBox.AppendText(i + " => " + "(" + newEintersect[i].p1 + ", " + newEintersect[i].p2 + ")" + Environment.NewLine);
-            //}
-
             // Draw object on the screen
             draw();
+        }
+        #endregion
 
+        #region Main code
+        public Form1()
+        {
+            InitializeComponent();
+        }
+
+        private void drawBtn_Click(object sender, EventArgs e)
+        {
+            display();
         }
 
         private void defaultSettingsBtn_Click(object sender, EventArgs e)
@@ -673,7 +574,6 @@ namespace _3DCGA_PA4
                 Filter = "txt files (*.txt)|*.txt",
                 FilterIndex = 2,
                 RestoreDirectory = true,
-
             };
             if (sd.ShowDialog() == DialogResult.OK)
             {
@@ -790,9 +690,25 @@ namespace _3DCGA_PA4
                     }
                 }
             }
-            objectNameTextBox.BackColor = Color.LightGreen;
-            drawBtn.Enabled = true;
-            label11.Visible = false;
+            if (objectLoaded)
+            {
+                objectNameTextBox.BackColor = Color.LightGreen;
+                drawBtn.Enabled = true;
+                boundaryboxCheckBox.Enabled = true;
+                label11.Visible = false;
+            }
+        }
+
+        private void Form1_Load(object sender, EventArgs e)
+        {
+            objectNameTextBox.BackColor = Color.LightCoral;
+            drawBtn.Enabled = false;
+            boundaryboxCheckBox.Enabled = false;
+        }
+
+        private void boundaryboxCheckBox_CheckedChanged(object sender, EventArgs e)
+        {
+            display();
         }
         #endregion
     }

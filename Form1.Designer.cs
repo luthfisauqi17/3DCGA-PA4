@@ -413,6 +413,7 @@
             this.boundaryboxCheckBox.TabIndex = 26;
             this.boundaryboxCheckBox.Text = "Boundary box";
             this.boundaryboxCheckBox.UseVisualStyleBackColor = true;
+            this.boundaryboxCheckBox.CheckedChanged += new System.EventHandler(this.boundaryboxCheckBox_CheckedChanged);
             // 
             // label11
             // 
@@ -427,7 +428,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(829, 774);
+            this.ClientSize = new System.Drawing.Size(829, 816);
             this.Controls.Add(this.label11);
             this.Controls.Add(this.boundaryboxCheckBox);
             this.Controls.Add(this.objectNameTextBox);
